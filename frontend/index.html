@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>World Football Cup 2026</title>
+  </head>
+  <body>
+    <h1>World Football Cup 2026</h1>
+    <p>Frontend file for the project app.</p>
+    <p id="status">Loading backend data...</p>
+
+    <script>
+      fetch('http://localhost:3000/api/info')
+        .then((response) => response.json())
+        .then((data) => {
+          document.getElementById('status').textContent = data.message;
+        })
+        .catch(() => {
+          document.getElementById('status').textContent =
+            'Backend unavailable. Start backend/server.js first.';
+        });
+    </script>
+  </body>
+</html>
