@@ -1,6 +1,6 @@
 namespace ObligatorioAPI.Models;
 
-public class EventoResponse
+public class Evento
 {
     public int Id { get; set; }
     public string Estadio { get; set; } = string.Empty;
