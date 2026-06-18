@@ -225,24 +225,6 @@ CREATE INDEX idx_transf_entrada  ON Transferencia(id_entrada);
 CREATE INDEX idx_comision_fechas ON ComisionVigente(fecha_desde, fecha_hasta);
 CREATE INDEX idx_fes_funcionario ON FuncionarioEventoSector(id_funcionario);
 
-CREATE TRIGGER limite_entradas
-BEFORE INSERT ON Entrada
-REFERENCING NEW AS nueva
-FOR EACH ROW
-BEGIN ATOMIC
-    DECLARE v_cantidad INTEGER;
-
-    SELECT COUNT(*)
-    INTO v_cantidad
-    FROM Entrada
-    WHERE id_compra = nueva.id_compra;
-
-    IF v_cantidad >= 5 THEN
-        SIGNAL SQLSTATE '75001'
-            SET MESSAGE_TEXT = 'No se pueden agregar mas de 5 entradas en una misma compra';
-    END IF;
-END;
-
 CREATE TRIGGER no_superposicion_eventos
 BEFORE INSERT ON Evento
 REFERENCING NEW AS nuevo

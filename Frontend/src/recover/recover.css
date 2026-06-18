@@ -1,0 +1,163 @@
+.recover-page {
+	min-height: 100vh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: clamp(1rem, 3vw, 2.5rem);
+	background:
+	  radial-gradient(circle at top left, rgba(255, 255, 255, 0.28), transparent 26%),
+	  radial-gradient(circle at bottom right, rgba(255, 255, 255, 0.18), transparent 24%),
+	  linear-gradient(135deg, #d9252a 0%, #0b8f4c 52%, #ffffff 100%);
+}
+
+.recover-card {
+	background: rgba(255, 255, 255, 0.97);
+	border-radius: 28px;
+	padding: 1.6rem 1.75rem 1.35rem;
+	width: 100%;
+	max-width: 410px;
+	box-shadow: 0 30px 80px rgba(18, 32, 45, 0.22);
+	backdrop-filter: blur(14px);
+	border: 1px solid rgba(255, 255, 255, 0.42);
+}
+
+.recover-accentBar {
+	height: 7px;
+	border-radius: 999px;
+	margin-bottom: 1.2rem;
+	background: linear-gradient(90deg, #d9252a 0%, #ffffff 40%, #0b8f4c 100%);
+}
+
+.recover-header {
+	text-align: center;
+	margin-bottom: 0.8rem;
+}
+
+.recover-logoIcon {
+	font-size: 34px;
+	margin-bottom: 0.5rem;
+}
+
+.recover-title {
+	font-size: 1.4rem;
+	font-weight: 800;
+	letter-spacing: -0.02em;
+	margin: 0 0 0.2rem;
+	color: #13202d;
+}
+
+.recover-subtitle {
+	font-size: 0.92rem;
+	color: #5c6a78;
+	margin: 0;
+}
+
+.recover-note {
+	margin: 1rem 0 1.1rem;
+	padding: 0.95rem 1rem;
+	border-radius: 18px;
+	background: #f6fbf7;
+	color: #30405b;
+	border: 1px solid #dbe9de;
+	display: grid;
+	gap: 0.25rem;
+}
+
+.recover-note strong {
+	font-size: 0.94rem;
+}
+
+.recover-note span {
+	font-size: 0.9rem;
+	line-height: 1.45;
+}
+
+.recover-form {
+	margin-top: 0.25rem;
+}
+
+.recover-field {
+	margin-bottom: 1rem;
+}
+
+.recover-label {
+	display: block;
+	font-size: 13px;
+	color: #555;
+	margin-bottom: 5px;
+}
+
+.recover-input {
+	width: 100%;
+	box-sizing: border-box;
+	padding: 0.95rem 1rem;
+	font-size: 0.95rem;
+	border: 1px solid #d8e0ec;
+	border-radius: 14px;
+	outline: none;
+	font-family: inherit;
+	background: #fff;
+	color: #13202d;
+	transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.recover-input:focus {
+	border-color: #0b8f4c;
+	box-shadow: 0 0 0 4px rgba(11, 143, 76, 0.09);
+	transform: translateY(-1px);
+}
+
+.recover-btn {
+	width: 100%;
+	padding: 0.98rem 1rem;
+	border: none;
+	border-radius: 14px;
+	font-size: 0.98rem;
+	cursor: pointer;
+}
+
+.recover-btn-primary {
+	background: linear-gradient(135deg, #d9252a 0%, #a71622 45%, #0b8f4c 100%);
+	color: #fff;
+	font-weight: 800;
+	margin-top: 0.2rem;
+	box-shadow: 0 16px 32px rgba(169, 22, 34, 0.24);
+}
+
+.recover-footer {
+	margin-top: 1rem;
+	text-align: center;
+	font-size: 0.88rem;
+	color: #5f6d7d;
+}
+
+.recover-footer p {
+	margin: 0 0 0.4rem;
+}
+
+.recover-link-button {
+	border: none;
+	background: transparent;
+	color: #0b8f4c;
+	font-weight: 800;
+	cursor: pointer;
+	padding: 0;
+	font-size: 0.88rem;
+}
+
+.recover-link-button-secondary {
+	display: block;
+	margin: 1rem auto 0;
+	color: #0b8f4c;
+}
+
+@media (max-width: 600px) {
+	.recover-page {
+		padding: 1rem;
+	}
+
+	.recover-card {
+		padding: 1.35rem 1.05rem 1.1rem;
+		border-radius: 22px;
+	}
+}
