@@ -1,31 +1,23 @@
--- Sistema de Ticketing Mundial 2026
-
 CREATE TABLE Pais (
-    id_pais     INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_pais     INTEGER AUTO_INCREMENT PRIMARY KEY,
     codigo      VARCHAR(3)  NOT NULL UNIQUE,
     nombre      VARCHAR(80) NOT NULL
 );
 
 CREATE TABLE Equipo (
-    id_equipo   INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_equipo   INTEGER AUTO_INCREMENT PRIMARY KEY,
     nombre      VARCHAR(80) NOT NULL UNIQUE
 );
 
 CREATE TABLE Estadio (
-    id_estadio  INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_estadio  INTEGER AUTO_INCREMENT PRIMARY KEY,
     nombre      VARCHAR(100) NOT NULL,
     id_pais     INTEGER NOT NULL,
     CONSTRAINT fk_estadio_pais FOREIGN KEY (id_pais) REFERENCES Pais(id_pais)
 );
 
--- ============================================================
--- 2. COMISION VIGENTE (tabla de configuracion global)
---    Representa la tasa de comision activa en cada periodo.
---    fecha_hasta NULL indica la comision actualmente vigente.
--- ============================================================
-
 CREATE TABLE ComisionVigente (
-    id_comision  INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_comision  INTEGER AUTO_INCREMENT PRIMARY KEY,
     porcentaje   DECIMAL(5,2) NOT NULL,
     fecha_desde  DATE NOT NULL,
     fecha_hasta  DATE,                         -- NULL = vigente actualmente
@@ -34,7 +26,7 @@ CREATE TABLE ComisionVigente (
 );
 
 CREATE TABLE Usuario (
-    id_usuario    INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_usuario    INTEGER AUTO_INCREMENT PRIMARY KEY,
     nombre        VARCHAR(120) NOT NULL,
     correo        VARCHAR(120) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
@@ -43,7 +35,7 @@ CREATE TABLE Usuario (
 );
 
 CREATE TABLE Documento (
-    id_documento  INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_documento  INTEGER AUTO_INCREMENT PRIMARY KEY,
     id_usuario    INTEGER NOT NULL,
     id_pais       INTEGER NOT NULL,            -- pais emisor del documento
     tipo          VARCHAR(20) NOT NULL,        -- ej. 'CI', 'PASAPORTE', 'DNI'
@@ -54,7 +46,7 @@ CREATE TABLE Documento (
 );
 
 CREATE TABLE Direccion (
-    id_direccion  INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_direccion  INTEGER AUTO_INCREMENT PRIMARY KEY,
     id_usuario    INTEGER NOT NULL,
     id_pais       INTEGER NOT NULL,
     localidad     VARCHAR(80)  NOT NULL,
@@ -66,7 +58,7 @@ CREATE TABLE Direccion (
 );
 
 CREATE TABLE Telefono (
-    id_telefono INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_telefono INTEGER AUTO_INCREMENT PRIMARY KEY,
     id_usuario  INTEGER NOT NULL,
     numero      VARCHAR(20) NOT NULL,
     CONSTRAINT fk_tel_usuario FOREIGN KEY (id_usuario) REFERENCES Usuario(id_usuario)
@@ -88,14 +80,14 @@ CREATE TABLE Funcionario (
 
 CREATE TABLE UsuarioGeneral (
     id_usuario           INTEGER PRIMARY KEY,
-    fecha_registro       TIMESTAMP NOT NULL DEFAULT CURRENT TIMESTAMP,
+    fecha_registro       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     estado_verificacion  VARCHAR(20) NOT NULL DEFAULT 'PENDIENTE',
     CONSTRAINT fk_ug_usuario FOREIGN KEY (id_usuario) REFERENCES Usuario(id_usuario),
     CONSTRAINT ck_ug_estado  CHECK (estado_verificacion IN ('PENDIENTE','VERIFICADO','RECHAZADO'))
 );
 
 CREATE TABLE Sector (
-    id_sector        INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_sector        INTEGER AUTO_INCREMENT PRIMARY KEY,
     id_estadio       INTEGER NOT NULL,
     nombre           CHAR(1) NOT NULL,
     capacidad_maxima INTEGER NOT NULL,
@@ -106,7 +98,7 @@ CREATE TABLE Sector (
 );
 
 CREATE TABLE Evento (
-    id_evento           INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_evento           INTEGER AUTO_INCREMENT PRIMARY KEY,
     id_estadio          INTEGER NOT NULL,
     id_equipo_local     INTEGER NOT NULL,
     id_equipo_visitante INTEGER NOT NULL,
@@ -120,7 +112,7 @@ CREATE TABLE Evento (
 );
 
 CREATE TABLE EventoSector (
-    id_evento_sector INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_evento_sector INTEGER AUTO_INCREMENT PRIMARY KEY,
     id_evento        INTEGER NOT NULL,
     id_sector        INTEGER NOT NULL,
     costo            DECIMAL(10,2) NOT NULL,
@@ -139,7 +131,7 @@ CREATE TABLE FuncionarioEventoSector (
 );
 
 CREATE TABLE Dispositivo (
-    id_dispositivo INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_dispositivo INTEGER AUTO_INCREMENT PRIMARY KEY,
     codigo         VARCHAR(40) NOT NULL UNIQUE,
     id_funcionario INTEGER NOT NULL,
     autorizado     SMALLINT NOT NULL DEFAULT 1,  -- 1=activo, 0=revocado
@@ -148,10 +140,10 @@ CREATE TABLE Dispositivo (
 );
 
 CREATE TABLE Compra (
-    id_compra         INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_compra         INTEGER AUTO_INCREMENT PRIMARY KEY,
     id_usuario        INTEGER NOT NULL,
     id_comision       INTEGER NOT NULL,          -- comision vigente al momento de la compra
-    fecha             TIMESTAMP NOT NULL DEFAULT CURRENT TIMESTAMP,
+    fecha             TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     estado            VARCHAR(20) NOT NULL DEFAULT 'PENDIENTE',
     monto_total       DECIMAL(10,2) NOT NULL,
     comision_aplicada DECIMAL(5,2) NOT NULL,     -- snapshot del % en el momento de la compra
@@ -163,7 +155,7 @@ CREATE TABLE Compra (
 );
 
 CREATE TABLE Entrada (
-    id_entrada                INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_entrada                INTEGER AUTO_INCREMENT PRIMARY KEY,
     id_compra                 INTEGER NOT NULL,
     id_evento_sector          INTEGER NOT NULL,
     id_usuario_actual         INTEGER NOT NULL,
@@ -178,11 +170,11 @@ CREATE TABLE Entrada (
 );
 
 CREATE TABLE Transferencia (
-    id_transferencia INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_transferencia INTEGER AUTO_INCREMENT PRIMARY KEY,
     id_entrada       INTEGER NOT NULL,
     id_origen        INTEGER NOT NULL,
     id_destino       INTEGER NOT NULL,
-    fecha_hora       TIMESTAMP NOT NULL DEFAULT CURRENT TIMESTAMP,
+    fecha_hora       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     estado           VARCHAR(20) NOT NULL DEFAULT 'PENDIENTE',
     CONSTRAINT fk_transf_entrada FOREIGN KEY (id_entrada)  REFERENCES Entrada(id_entrada),
     CONSTRAINT fk_transf_origen  FOREIGN KEY (id_origen)   REFERENCES Usuario(id_usuario),
@@ -192,10 +184,10 @@ CREATE TABLE Transferencia (
 );
 
 CREATE TABLE TokenQR (
-    id_token    INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_token    INTEGER AUTO_INCREMENT PRIMARY KEY,
     id_entrada  INTEGER NOT NULL,
     codigo      VARCHAR(64) NOT NULL,
-    generado_en TIMESTAMP NOT NULL DEFAULT CURRENT TIMESTAMP,
+    generado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     expira_en   TIMESTAMP NOT NULL,              -- generado_en + 30 segundos
     estado      VARCHAR(20) NOT NULL DEFAULT 'ACTIVO',
     CONSTRAINT fk_token_entrada FOREIGN KEY (id_entrada) REFERENCES Entrada(id_entrada),
@@ -203,12 +195,12 @@ CREATE TABLE TokenQR (
 );
 
 CREATE TABLE ValidacionLog (
-    id_validacion  INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_validacion  INTEGER AUTO_INCREMENT PRIMARY KEY,
     id_entrada     INTEGER NOT NULL,
     id_token       INTEGER NOT NULL,
     id_funcionario INTEGER NOT NULL,
     id_dispositivo INTEGER NOT NULL,
-    fecha_hora     TIMESTAMP NOT NULL DEFAULT CURRENT TIMESTAMP,
+    fecha_hora     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     resultado      VARCHAR(20) NOT NULL,
     CONSTRAINT fk_val_entrada     FOREIGN KEY (id_entrada)     REFERENCES Entrada(id_entrada),
     CONSTRAINT fk_val_token       FOREIGN KEY (id_token)       REFERENCES TokenQR(id_token),
@@ -225,21 +217,21 @@ CREATE INDEX idx_transf_entrada  ON Transferencia(id_entrada);
 CREATE INDEX idx_comision_fechas ON ComisionVigente(fecha_desde, fecha_hasta);
 CREATE INDEX idx_fes_funcionario ON FuncionarioEventoSector(id_funcionario);
 
-CREATE TRIGGER no_superposicion_eventos
-BEFORE INSERT ON Evento
-REFERENCING NEW AS nuevo
-FOR EACH ROW
-BEGIN ATOMIC
-    DECLARE v_conflictos INTEGER;
-
-    SELECT COUNT(*)
-    INTO v_conflictos
-    FROM Evento
-    WHERE id_estadio = nuevo.id_estadio
-      AND fecha_hora = nuevo.fecha_hora;
-
-    IF v_conflictos > 0 THEN
-        SIGNAL SQLSTATE '75002'
-            SET MESSAGE_TEXT = 'Ya existe un evento programado en ese estadio para esa fecha y hora';
-    END IF;
-END;
+-- CREATE TRIGGER no_superposicion_eventos
+-- BEFORE INSERT ON Evento
+-- REFERENCING NEW AS nuevo
+-- FOR EACH ROW
+-- BEGIN ATOMIC
+--     DECLARE v_conflictos INTEGER;
+--
+--     SELECT COUNT(*)
+--     INTO v_conflictos
+--     FROM Evento
+--     WHERE id_estadio = nuevo.id_estadio
+--       AND fecha_hora = nuevo.fecha_hora;
+--
+--     IF v_conflictos > 0 THEN
+--         SIGNAL SQLSTATE '75002'
+--             SET MESSAGE_TEXT = 'Ya existe un evento programado en ese estadio para esa fecha y hora';
+--     END IF;
+-- END;
