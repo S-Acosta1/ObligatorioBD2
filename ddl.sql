@@ -48,7 +48,7 @@ CREATE TABLE Telefono (
 CREATE TABLE Administrador (
     email_usuario     VARCHAR(120) NOT NULL PRIMARY KEY,
 	fecha_asignacion  DATE         NOT NULL,
-    cod_pais          VARCHAR(30)  NOT NULL,
+    cod_pais          VARCHAR(3)  NOT NULL,
     CONSTRAINT fk_admin_usuario FOREIGN KEY (email_usuario) REFERENCES Usuario(email),
     CONSTRAINT fk_admin_pais    FOREIGN KEY (cod_pais) REFERENCES Pais(codigo)
 );
@@ -136,10 +136,10 @@ CREATE TABLE Evento (
 );
 
 CREATE TABLE EventoHabilitaSector (
-    id_sector       INTEGER NOT NULL,
-	nombre_sector   CHAR(1) NOT NULL,
+    id_evento       INTEGER NOT NULL,
+    id_sector        INTEGER NOT NULL,
     nombre_estadio  VARCHAR(100) NOT NULL,
-	PRIMARY KEY (id_evento, nombre_sector, nombre_estadio),
+	PRIMARY KEY (id_evento, id_sector, nombre_estadio),
 
     CONSTRAINT fk_habilita_evento
 	FOREIGN KEY (id_evento)
@@ -147,30 +147,30 @@ CREATE TABLE EventoHabilitaSector (
 
     CONSTRAINT fk_habilita_sector
 	FOREIGN KEY (id_sector, nombre_estadio)
-	REFERENCES Sector(id_sector, nombre_estadio),
+	REFERENCES Sector(id_sector, nombre_estadio)
 );
 
 CREATE TABLE FuncionarioAsignadoEventoSector (
 	email_funcionario VARCHAR(120) NOT NULL,
+	id_evento       INTEGER NOT NULL,
     id_sector       INTEGER NOT NULL,
-	nombre_sector   CHAR(1) NOT NULL,
     nombre_estadio  VARCHAR(100) NOT NULL,
-	PRIMARY KEY (email_funcionario, id_sector, nombre_sector, nombre_estadio),
+	PRIMARY KEY (email_funcionario, id_evento, id_sector, nombre_estadio),
 
 	CONSTRAINT fk_habilita_evento_sector
-	FOREIGN KEY (id_sector, nombre_sector, nombre_estadio)
-	REFERENCES EventoHabilitaSector(id_sector, nombre_sector, nombre_estadio),
+	FOREIGN KEY (id_evento, id_sector, nombre_estadio)
+	REFERENCES EventoHabilitaSector(id_evento, id_sector, nombre_estadio),
 
 	CONSTRAINT fk_habilita_funcionario
 	FOREIGN KEY (email_funcionario)
-	REFERENCES Funcionario(email_usuario),
+	REFERENCES Funcionario(email_usuario)
 );
 
 CREATE TABLE Comision (
 	id_comision   INTEGER NOT NULL PRIMARY KEY,
 	porcentaje    DECIMAL(5, 2) NOT NULL,
 	fecha_inicio  DATE NOT NULL,
-	fecha_final   DATE,
+	fecha_final   DATE
 );
 
 CREATE TABLE Compra (
@@ -185,7 +185,7 @@ CREATE TABLE Compra (
 	REFERENCES Usuario(email),
 
     CONSTRAINT ck_compra_estado   CHECK (estado IN ('PENDIENTE','CONFIRMADA','PAGA')),
-    CONSTRAINT ck_compra_monto    CHECK (monto_total >= 0),
+    CONSTRAINT ck_compra_monto    CHECK (monto_total >= 0)
 );
 
 CREATE TABLE CompraAplicaComision (
@@ -206,8 +206,8 @@ CREATE TABLE Entrada (
 	id_entrada      INTEGER       NOT NULL PRIMARY KEY,
 	precio          DECIMAL(5, 2) NOT NULL,
 	estado          VARCHAR(10)   NOT NULL DEFAULT 'VALIDA',
+	id_evento       INTEGER       NOT NULL,
     id_sector       INTEGER       NOT NULL,
-	nombre_sector   CHAR(1)       NOT NULL,
     nombre_estadio  VARCHAR(100)  NOT NULL,
 	id_compra       INTEGER       NOT NULL,
 	email_usuario   VARCHAR(120)  NOT NULL,
@@ -217,8 +217,8 @@ CREATE TABLE Entrada (
 	REFERENCES Compra(id_compra),
 
 	CONSTRAINT fk_entrada_evento
-	FOREIGN KEY (id_sector, nombre_sector, nombre_estadio)
-	REFERENCES EventoHabilitaSector(id_sector, nombre_sector, nombre_estadio),
+	FOREIGN KEY (id_evento, id_sector, nombre_estadio)
+	REFERENCES EventoHabilitaSector(id_evento, id_sector, nombre_estadio),
 
 	CONSTRAINT fk_entrada_usuario
 	FOREIGN KEY (email_usuario)
@@ -227,20 +227,32 @@ CREATE TABLE Entrada (
     CONSTRAINT ck_entrada_estado  CHECK (estado IN ('VALIDA','CONSUMIDA','ANULADA'))
 );
 
--- TODO:
--- CREATE TABLE Transferencia (
---     id_transferencia INTEGER AUTO_INCREMENT PRIMARY KEY,
---     id_entrada       INTEGER NOT NULL,
---     id_origen        INTEGER NOT NULL,
---     id_destino       INTEGER NOT NULL,
---     fecha_hora       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
---     estado           VARCHAR(20) NOT NULL DEFAULT 'PENDIENTE',
---     CONSTRAINT fk_transf_entrada FOREIGN KEY (id_entrada)  REFERENCES Entrada(id_entrada),
---     CONSTRAINT fk_transf_origen  FOREIGN KEY (id_origen)   REFERENCES Usuario(id_usuario),
---     CONSTRAINT fk_transf_destino FOREIGN KEY (id_destino)  REFERENCES Usuario(id_usuario),
---     CONSTRAINT ck_transf_estado  CHECK (estado IN ('PENDIENTE','ACEPTADA','RECHAZADA')),
---     CONSTRAINT ck_transf_partes  CHECK (id_origen <> id_destino)
--- );
+CREATE TABLE Transferencia (
+    id_transferencia INTEGER AUTO_INCREMENT PRIMARY KEY,
+    email_usuario_origen        VARCHAR(120) NOT NULL,
+    email_usuario_recibe       VARCHAR(120) NOT NULL,
+    fecha_hora       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    estado           VARCHAR(20) NOT NULL DEFAULT 'PENDIENTE',
+
+    CONSTRAINT fk_transf_origen  FOREIGN KEY (email_usuario_origen)   REFERENCES Usuario(email),
+    CONSTRAINT fk_transf_destino FOREIGN KEY (email_usuario_recibe)  REFERENCES Usuario(email),
+    CONSTRAINT ck_transf_estado  CHECK (estado IN ('PENDIENTE','ACEPTADA','RECHAZADA')),
+    CONSTRAINT ck_transf_partes  CHECK (email_usuario_origen <> email_usuario_recibe)
+);
+
+CREATE TABLE TransferenciaContieneEntrada (
+	id_transferencia INTEGER NOT NULL,
+	id_entrada INTEGER NOT NULL,
+	PRIMARY KEY (id_transferencia, id_entrada),
+
+    CONSTRAINT fk_contiene_transf
+	FOREIGN KEY (id_transferencia)
+	REFERENCES Transferencia(id_transferencia),
+
+    CONSTRAINT fk_contiene_entrada
+	FOREIGN KEY (id_entrada)
+	REFERENCES Entrada(id_entrada)
+);
 
 CREATE TABLE Escaner (
 	id_escaner      INTEGER       NOT NULL,
@@ -264,52 +276,18 @@ CREATE TABLE FuncionarioEscaner (
 
 	CONSTRAINT fk_escaner_escaner
 	FOREIGN KEY (id_escaner, nombre_estadio)
-	REFERENCES Escaner(id_escaner, nombre_estadio),
+	REFERENCES Escaner(id_escaner, nombre_estadio)
 );
 
 CREATE TABLE TokenQR (
     id_token    INTEGER AUTO_INCREMENT PRIMARY KEY,
-    id_entrada  INTEGER NOT NULL,
-    codigo      VARCHAR(64) NOT NULL,
+	estado      VARCHAR(20) NOT NULL DEFAULT 'ACTIVO',
+	codigo      VARCHAR(64) NOT NULL,
     generado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     expira_en   TIMESTAMP NOT NULL,
-    estado      VARCHAR(20) NOT NULL DEFAULT 'ACTIVO',
-	email_funcionario_verificador VARCHAR(120),
-	id_escaner_verificador INTEGER,
-	nombre_estadio_verificador VARCHAR(100),
-	fecha_verificacion TIMESTAMP,
+	id_entrada  INTEGER NOT NULL,
 
     CONSTRAINT fk_token_entrada FOREIGN KEY (id_entrada) REFERENCES Entrada(id_entrada),
 
-    CONSTRAINT fk_token_verificador
-	FOREIGN KEY (email_funcionario, id_escaner, nombre_estadio)
-	REFERENCES FuncionarioEscaner(email_funcionario, id_escaner, nombre_estadio),
-
     CONSTRAINT ck_token_estado  CHECK (estado IN ('ACTIVO','EXPIRADO','CONSUMIDO'))
 );
-
-CREATE INDEX idx_entrada_usuario ON Entrada(id_usuario_actual);
-CREATE INDEX idx_compra_usuario  ON Compra(id_usuario);
-CREATE INDEX idx_evento_fecha    ON Evento(fecha_hora);
-CREATE INDEX idx_token_entrada   ON TokenQR(id_entrada, estado);
-CREATE INDEX idx_transf_entrada  ON Transferencia(id_entrada);
-CREATE INDEX idx_fes_funcionario ON FuncionarioEventoSector(id_funcionario);
-
--- CREATE TRIGGER no_superposicion_eventos
--- BEFORE INSERT ON Evento
--- REFERENCING NEW AS nuevo
--- FOR EACH ROW
--- BEGIN ATOMIC
---     DECLARE v_conflictos INTEGER;
---
---     SELECT COUNT(*)
---     INTO v_conflictos
---     FROM Evento
---     WHERE id_estadio = nuevo.id_estadio
---       AND fecha_hora = nuevo.fecha_hora;
---
---     IF v_conflictos > 0 THEN
---         SIGNAL SQLSTATE '75002'
---             SET MESSAGE_TEXT = 'Ya existe un evento programado en ese estadio para esa fecha y hora';
---     END IF;
--- END;
