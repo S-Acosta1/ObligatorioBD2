@@ -23,6 +23,36 @@
 	border: 1px solid rgba(255, 255, 255, 0.42);
 }
 
+.purchase-topbar {
+	grid-column: 1 / -1;
+	display: flex;
+	justify-content: flex-start;
+	position: relative;
+	z-index: 1;
+}
+
+.purchase-homeButton,
+.purchase-secondaryAction {
+	border: 1px solid rgba(255, 255, 255, 0.34);
+	border-radius: 999px;
+	background: rgba(255, 255, 255, 0.2);
+	color: #fff;
+	padding: 0.85rem 1.1rem;
+	font: inherit;
+	font-weight: 900;
+	cursor: pointer;
+	backdrop-filter: blur(10px);
+	box-shadow: 0 14px 30px rgba(51, 18, 24, 0.16);
+}
+
+.purchase-secondaryAction {
+	width: 100%;
+	background: #f2faf5;
+	color: #214438;
+	border-color: #d8ece0;
+	box-shadow: none;
+}
+
 .purchase-kicker {
 	margin: 0 0 0.35rem;
 	text-transform: uppercase;
@@ -204,5 +234,87 @@
 	.purchase-grid,
 	.purchase-summaryBox {
 		grid-template-columns: 1fr;
+	}
+}
+
+.purchase-page {
+	background:
+		linear-gradient(115deg, rgba(6, 113, 63, 0.94) 0%, rgba(6, 113, 63, 0.9) 35%, rgba(255, 255, 255, 0.96) 35%, rgba(255, 255, 255, 0.96) 42%, rgba(185, 21, 36, 0.94) 42%, rgba(185, 21, 36, 0.93) 100%),
+		repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.12) 0 1px, transparent 1px 88px),
+		linear-gradient(135deg, #06713f 0%, #f7faf8 50%, #b91524 100%);
+	position: relative;
+	overflow-x: hidden;
+}
+
+.purchase-page::before {
+	content: "";
+	position: fixed;
+	inset: 1rem;
+	border: 1px solid rgba(255, 255, 255, 0.22);
+	border-radius: 30px;
+	pointer-events: none;
+}
+
+.purchase-summary,
+.purchase-card {
+	border-radius: 22px;
+	border-color: rgba(255, 255, 255, 0.72);
+	box-shadow: 0 24px 60px rgba(51, 18, 24, 0.16);
+	position: relative;
+	overflow: hidden;
+}
+
+.purchase-summary::before,
+.purchase-card::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	height: 6px;
+	background: linear-gradient(90deg, #087a45 0 33%, #fff 33% 66%, #c9182b 66% 100%);
+}
+
+.purchase-title {
+	letter-spacing: 0;
+	color: #17251f;
+}
+
+.purchase-kicker,
+.purchase-back {
+	color: #087a45;
+	font-weight: 900;
+}
+
+.purchase-stepper span,
+.purchase-matchbox,
+.purchase-summaryBox {
+	background: #f2faf5;
+	border: 1px solid #d8ece0;
+}
+
+.purchase-stepper span.is-active,
+.purchase-submit {
+	background: linear-gradient(135deg, #c9182b 0%, #f7f7f2 49%, #087a45 100%);
+	color: #15251e;
+	box-shadow: 0 16px 34px rgba(91, 21, 28, 0.2);
+}
+
+.purchase-submit,
+.purchase-back,
+.purchase-homeButton,
+.purchase-secondaryAction {
+	transition: transform 0.18s ease;
+}
+
+.purchase-submit:hover,
+.purchase-back:hover,
+.purchase-homeButton:hover,
+.purchase-secondaryAction:hover {
+	transform: translateY(-2px);
+}
+
+@media (max-width: 600px) {
+	.purchase-page::before {
+		inset: 0.5rem;
+		border-radius: 22px;
 	}
 }

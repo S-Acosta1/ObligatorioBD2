@@ -58,10 +58,23 @@ function formatDate(dateValue) {
   }).format(new Date(`${dateValue}T00:00:00`));
 }
 
-export default function Home({ ownedTickets = [], onBuyTicket, onTransferTicket, onNotify, onLogout }) {
+export default function Home({
+  currentUser,
+  purchasedTickets = [],
+  heldTickets = [],
+  pendingReceivedTransfers = [],
+  transferHistory = [],
+  onBuyTicket,
+  onTransferTicket,
+  onAcceptTransfer,
+  onRejectTransfer,
+  onNotify,
+  onLogout,
+}) {
   const [selectionFilter, setSelectionFilter] = useState("Todas");
   const [searchTerm, setSearchTerm] = useState("");
   const [showTickets, setShowTickets] = useState(false);
+  const [ticketView, setTicketView] = useState("held");
   const [transferTicketId, setTransferTicketId] = useState(null);
   const [transferRecipient, setTransferRecipient] = useState("");
 
@@ -94,11 +107,147 @@ export default function Home({ ownedTickets = [], onBuyTicket, onTransferTicket,
     }
 
     onTransferTicket(transferTicketId, transferRecipient.trim());
-    if (typeof onNotify === "function") {
-      onNotify("Transferencia realizada con éxito.", "success");
-    }
     setTransferTicketId(null);
     setTransferRecipient("");
+  };
+
+  const renderTicketCard = (ticket, options = {}) => {
+    const { canTransfer = false, isPendingTransfer = false, pendingDirection = "" } = options;
+    const isTransferring = transferTicketId === ticket.id;
+
+    return (
+      <article key={ticket.id} className="ticket-card">
+        <div className="ticket-card__top">
+          <div>
+            <p className="ticket-card__badge">{ticket.competition}</p>
+            <h3 className="ticket-card__title">
+              {ticket.selection} vs {ticket.rival}
+            </h3>
+            <p className="ticket-card__subtitle">
+              {formatDate(ticket.date)} · {ticket.time}
+            </p>
+          </div>
+          <div className="ticket-card__price">
+            <span>Total</span>
+            <strong>${ticket.totalPrice}</strong>
+          </div>
+        </div>
+
+        <div className="ticket-card__details">
+          <p><strong>Cantidad:</strong> {ticket.quantity}</p>
+          <p><strong>Tipo:</strong> {ticket.ticketType.toUpperCase()}</p>
+          <p><strong>Documento:</strong> {ticket.documentType === "passport" ? "Pasaporte" : "DNI / CI"} {ticket.documentNumber}</p>
+          <p><strong>Comprador:</strong> {ticket.purchasedByName}</p>
+          <p><strong>Titular actual:</strong> {ticket.currentHolder}</p>
+          <p><strong>Estadio:</strong> {ticket.stadium}</p>
+          <p><strong>Ciudad:</strong> {ticket.city}</p>
+          {ticket.pendingTransfer && (
+            <p><strong>Transferencia pendiente:</strong> {ticket.pendingTransfer.fromName} → {ticket.pendingTransfer.toName}</p>
+          )}
+          {pendingDirection && <p><strong>Estado:</strong> {pendingDirection}</p>}
+        </div>
+
+        {canTransfer && (
+          <div className="ticket-card__actions">
+            <button
+              type="button"
+              className="ticket-card__action"
+              onClick={() => startTransfer(ticket.id)}
+              disabled={Boolean(ticket.pendingTransfer)}
+            >
+              {ticket.pendingTransfer ? "Esperando confirmación" : "Transferir"}
+            </button>
+          </div>
+        )}
+
+        {isPendingTransfer && (
+          <div className="ticket-card__actions">
+            <button type="button" className="ticket-card__action" onClick={() => onAcceptTransfer?.(ticket.id)}>
+              Aceptar transferencia
+            </button>
+            <button type="button" className="ticket-card__secondary" onClick={() => onRejectTransfer?.(ticket.id)}>
+              Rechazar
+            </button>
+          </div>
+        )}
+
+        {isTransferring && (
+          <div className="ticket-card__transfer">
+            <label className="ticket-card__transferField">
+              <span>Correo del usuario receptor</span>
+              <input
+                type="email"
+                placeholder="usuario@correo.com"
+                value={transferRecipient}
+                onChange={(event) => setTransferRecipient(event.target.value)}
+              />
+            </label>
+
+            <div className="ticket-card__transferActions">
+              <button type="button" className="ticket-card__secondary" onClick={() => setTransferTicketId(null)}>
+                Cancelar
+              </button>
+              <button type="button" className="ticket-card__action" onClick={confirmTransfer}>
+                Enviar solicitud
+              </button>
+            </div>
+          </div>
+        )}
+      </article>
+    );
+  };
+
+  const renderTicketPanelContent = () => {
+    if (ticketView === "pending") {
+      return pendingReceivedTransfers.length > 0 ? (
+        <div className="home-ticketGrid">
+          {pendingReceivedTransfers.map((ticket) =>
+            renderTicketCard(ticket, {
+              isPendingTransfer: true,
+              pendingDirection: `Solicitud recibida de ${ticket.pendingTransfer.fromName}`,
+            }),
+          )}
+        </div>
+      ) : (
+        <div className="home-empty home-empty--tickets">No tenés transferencias pendientes por aceptar.</div>
+      );
+    }
+
+    if (ticketView === "purchased") {
+      return purchasedTickets.length > 0 ? (
+        <div className="home-ticketGrid">
+          {purchasedTickets.map((ticket) => renderTicketCard(ticket))}
+        </div>
+      ) : (
+        <div className="home-empty home-empty--tickets">Todavía no realizaste compras con esta cuenta.</div>
+      );
+    }
+
+    if (ticketView === "history") {
+      return transferHistory.length > 0 ? (
+        <div className="home-historyList">
+          {transferHistory.map((movement) => (
+            <article key={`${movement.ticketId}-${movement.id}`} className="home-historyItem">
+              <p className="home-sectionKicker">{movement.competition}</p>
+              <h3>{movement.matchName}</h3>
+              <p>{formatDate(movement.date)} · {movement.time}</p>
+              <p><strong>Desde:</strong> {movement.fromName} · <strong>Hacia:</strong> {movement.toName}</p>
+              <p><strong>Aceptada:</strong> {new Date(movement.acceptedAt).toLocaleString("es-ES")}</p>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <div className="home-empty home-empty--tickets">Aún no hay transferencias aceptadas en tu historial.</div>
+      );
+    }
+
+    return heldTickets.length > 0 ? (
+      <div className="home-ticketGrid">
+        {heldTickets.map((ticket) => renderTicketCard(ticket, { canTransfer: true }))}
+      </div>
+    ) : (
+      <div className="home-empty home-empty--tickets">No tenés entradas en tu poder en este momento.</div>
+    );
   };
 
   return (
@@ -121,8 +270,8 @@ export default function Home({ ownedTickets = [], onBuyTicket, onTransferTicket,
               <span>Filtros activos</span>
             </article>
             <article>
-              <strong>Compra segura</strong>
-              <span>Checkout guiado</span>
+              <strong>{heldTickets.length}</strong>
+              <span>Entradas en tu poder</span>
             </article>
           </div>
         </div>
@@ -136,8 +285,8 @@ export default function Home({ ownedTickets = [], onBuyTicket, onTransferTicket,
         <button type="button" className="home-actionButton home-actionButton--primary" onClick={() => setShowTickets((currentValue) => !currentValue)}>
           {showTickets ? "Ocultar mis entradas" : "Ver mis entradas"}
         </button>
-        <button type="button" className="home-actionButton" onClick={() => setShowTickets(true)}>
-          Transferir entrada
+        <button type="button" className="home-actionButton" onClick={() => { setShowTickets(true); setTicketView("pending"); }}>
+          Transferencias pendientes ({pendingReceivedTransfers.length})
         </button>
       </section>
 
@@ -182,80 +331,27 @@ export default function Home({ ownedTickets = [], onBuyTicket, onTransferTicket,
           <div className="home-ticketsPanel__header">
             <div>
               <p className="home-sectionKicker">Mis entradas</p>
-              <h2>Entradas adquiridas y datos asociados</h2>
+              <h2>{currentUser?.name || "Usuario"} · gestión de entradas</h2>
             </div>
-            <p>{ownedTickets.length} entradas</p>
+            <p>{heldTickets.length} en poder · {purchasedTickets.length} compradas</p>
           </div>
 
-          {ownedTickets.length > 0 ? (
-            <div className="home-ticketGrid">
-              {ownedTickets.map((ticket) => {
-                const isTransferring = transferTicketId === ticket.id;
+          <div className="home-ticketTabs" role="tablist" aria-label="Vistas de entradas">
+            <button type="button" className={ticketView === "held" ? "is-active" : ""} onClick={() => setTicketView("held")}>
+              En mi poder ({heldTickets.length})
+            </button>
+            <button type="button" className={ticketView === "purchased" ? "is-active" : ""} onClick={() => setTicketView("purchased")}>
+              Compradas ({purchasedTickets.length})
+            </button>
+            <button type="button" className={ticketView === "pending" ? "is-active" : ""} onClick={() => setTicketView("pending")}>
+              Por aceptar ({pendingReceivedTransfers.length})
+            </button>
+            <button type="button" className={ticketView === "history" ? "is-active" : ""} onClick={() => setTicketView("history")}>
+              Historial ({transferHistory.length})
+            </button>
+          </div>
 
-                return (
-                  <article key={ticket.id} className="ticket-card">
-                    <div className="ticket-card__top">
-                      <div>
-                        <p className="ticket-card__badge">{ticket.competition}</p>
-                        <h3 className="ticket-card__title">
-                          {ticket.selection} vs {ticket.rival}
-                        </h3>
-                        <p className="ticket-card__subtitle">
-                          {formatDate(ticket.date)} · {ticket.time}
-                        </p>
-                      </div>
-                      <div className="ticket-card__price">
-                        <span>Total</span>
-                        <strong>${ticket.totalPrice}</strong>
-                      </div>
-                    </div>
-
-                    <div className="ticket-card__details">
-                      <p><strong>Cantidad:</strong> {ticket.quantity}</p>
-                      <p><strong>Tipo:</strong> {ticket.ticketType.toUpperCase()}</p>
-                      <p><strong>Documento:</strong> {ticket.documentType === "passport" ? "Pasaporte" : "DNI / CI"} {ticket.documentNumber}</p>
-                      <p><strong>Titular:</strong> {ticket.currentHolder}</p>
-                      <p><strong>Estadio:</strong> {ticket.stadium}</p>
-                      <p><strong>Ciudad:</strong> {ticket.city}</p>
-                    </div>
-
-                    <div className="ticket-card__actions">
-                      <button type="button" className="ticket-card__action" onClick={() => startTransfer(ticket.id)}>
-                        Transferir
-                      </button>
-                    </div>
-
-                    {isTransferring && (
-                      <div className="ticket-card__transfer">
-                        <label className="ticket-card__transferField">
-                          <span>Correo o usuario destino</span>
-                          <input
-                            type="text"
-                            placeholder="usuario@correo.com"
-                            value={transferRecipient}
-                            onChange={(event) => setTransferRecipient(event.target.value)}
-                          />
-                        </label>
-
-                        <div className="ticket-card__transferActions">
-                          <button type="button" className="ticket-card__secondary" onClick={() => setTransferTicketId(null)}>
-                            Cancelar
-                          </button>
-                          <button type="button" className="ticket-card__action" onClick={confirmTransfer}>
-                            Confirmar transferencia
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </article>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="home-empty home-empty--tickets">
-              Aún no tenés entradas compradas. Cuando confirmes una compra, aparecerán acá para verlas o transferirlas.
-            </div>
-          )}
+          {renderTicketPanelContent()}
         </section>
       )}
 

@@ -72,6 +72,17 @@
 	line-height: 1.45;
 }
 
+.register-error {
+	margin: 0 0 0.9rem;
+	padding: 0.8rem 0.9rem;
+	border-radius: 14px;
+	background: #fff1f2;
+	border: 1px solid #f3c6cc;
+	color: #a71622;
+	font-size: 0.88rem;
+	font-weight: 800;
+}
+
 .register-form {
 	margin-top: 0.25rem;
 }
@@ -160,4 +171,43 @@
 		padding: 1.35rem 1.05rem 1.1rem;
 		border-radius: 22px;
 	}
+}
+
+.register-page {
+	background:
+		linear-gradient(115deg, rgba(6, 113, 63, 0.94) 0%, rgba(6, 113, 63, 0.9) 35%, rgba(255, 255, 255, 0.96) 35%, rgba(255, 255, 255, 0.96) 42%, rgba(185, 21, 36, 0.94) 42%, rgba(185, 21, 36, 0.93) 100%),
+		linear-gradient(135deg, #06713f 0%, #f7faf8 50%, #b91524 100%);
+}
+
+.register-card {
+	border-radius: 22px;
+	box-shadow: 0 28px 70px rgba(51, 18, 24, 0.22);
+}
+
+.register-accentBar {
+	background: linear-gradient(90deg, #087a45 0 33%, #fff 33% 66%, #c9182b 66% 100%);
+}
+
+.register-note {
+	background: #f2faf5;
+	border-color: #d8ece0;
+}
+
+.register-title {
+	color: #17251f;
+}
+
+.register-input:focus {
+	border-color: #087a45;
+	box-shadow: 0 0 0 4px rgba(8, 122, 69, 0.1);
+}
+
+.register-btn-primary {
+	background: linear-gradient(135deg, #c9182b 0%, #f7f7f2 49%, #087a45 100%);
+	color: #15251e;
+	box-shadow: 0 16px 34px rgba(91, 21, 28, 0.2);
+}
+
+.register-link-button {
+	color: #087a45;
 }

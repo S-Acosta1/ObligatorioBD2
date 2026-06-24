@@ -70,6 +70,12 @@ export default function Purchase({ selectedMatch, onBackToHome, onConfirmPurchas
 
   return (
     <main className="purchase-page">
+      <div className="purchase-topbar">
+        <button type="button" className="purchase-homeButton" onClick={onBackToHome}>
+          Volver al inicio
+        </button>
+      </div>
+
       <section className="purchase-summary">
         <p className="purchase-kicker">Checkout oficial</p>
         <h1 className="purchase-title">{selectedMatch.selection} vs {selectedMatch.rival}</h1>
@@ -92,7 +98,7 @@ export default function Purchase({ selectedMatch, onBackToHome, onConfirmPurchas
         </div>
 
         <button type="button" className="purchase-back" onClick={onBackToHome}>
-          Volver a partidos
+          Cambiar partido
         </button>
       </section>
 
@@ -206,6 +212,10 @@ export default function Purchase({ selectedMatch, onBackToHome, onConfirmPurchas
 
           <button type="submit" className="purchase-submit">
             Confirmar compra
+          </button>
+
+          <button type="button" className="purchase-secondaryAction" onClick={onBackToHome}>
+            Volver al inicio sin comprar
           </button>
         </form>
       </section>

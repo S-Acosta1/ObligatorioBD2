@@ -1,15 +1,20 @@
 import { useState } from "react";
 import "./login.css";
 
-export default function Login({ onShowRegister, onShowRecover, onLoginSuccess }) {
+export default function Login({ users = [], onShowRegister, onShowRecover, onLoginSuccess, onNotify }) {
   const [correo, setCorreo] = useState("");
   const [password, setPassword] = useState("");
-  const [accountRole, setAccountRole] = useState("user");
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    console.log("Login:", correo, password);
-    onLoginSuccess?.(accountRole);
+    const normalizedEmail = correo.trim().toLowerCase();
+
+    if (!users.some((user) => user.email === normalizedEmail)) {
+      onNotify?.("No hay una cuenta registrada con ese correo.", "error");
+      return;
+    }
+
+    onLoginSuccess?.({ email: normalizedEmail, password });
   };
 
   return (
@@ -30,23 +35,10 @@ export default function Login({ onShowRegister, onShowRecover, onLoginSuccess })
         </div>
 
         <div className="login-intro">
-          <p>Elegí el perfil con el que querés entrar para acceder a la experiencia de usuario, funcionario o administrador.</p>
+          <p>Ingresá con tu correo y contraseña. El perfil se obtiene desde la cuenta registrada.</p>
         </div>
 
         <form className="login-form" onSubmit={handleSubmit}>
-          <div className="login-field">
-            <label className="login-label">Perfil de acceso</label>
-            <select
-              className="login-input login-select"
-              value={accountRole}
-              onChange={(e) => setAccountRole(e.target.value)}
-            >
-              <option value="user">Usuario general</option>
-              <option value="worker">Funcionario</option>
-              <option value="admin">Administrador</option>
-            </select>
-          </div>
-
           <div className="login-field">
             <label className="login-label">Correo electrónico</label>
             <input
@@ -55,6 +47,7 @@ export default function Login({ onShowRegister, onShowRecover, onLoginSuccess })
               placeholder="usuario@email.com"
               value={correo}
               onChange={(e) => setCorreo(e.target.value)}
+              required
             />
           </div>
 
@@ -66,12 +59,13 @@ export default function Login({ onShowRegister, onShowRecover, onLoginSuccess })
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              required
             />
           </div>
 
           <div className="login-note">
-            <span>Vistas por rol</span>
-            <strong>Usuario, funcionario y administrador</strong>
+            <span>Acceso por cuenta</span>
+            <strong>El sistema abre la vista correspondiente a tu rol.</strong>
           </div>
 
           <button className="login-btn login-btn-primary" type="submit">

@@ -4,7 +4,7 @@ import Register from "../register/register.jsx";
 import Recover from "../recover/recover.jsx";
 import "./auth.css";
 
-export default function Auth({ onLoginSuccess }) {
+export default function Auth({ users = [], onLoginSuccess, onRegisterUser, onNotify }) {
   const [activeView, setActiveView] = useState("login");
 
   return (
@@ -37,7 +37,9 @@ export default function Auth({ onLoginSuccess }) {
 
       {activeView === "login" && (
         <Login
+          users={users}
           onLoginSuccess={onLoginSuccess}
+          onNotify={onNotify}
           onShowRegister={() => setActiveView("register")}
           onShowRecover={() => setActiveView("recover")}
         />
@@ -45,6 +47,7 @@ export default function Auth({ onLoginSuccess }) {
 
       {activeView === "register" && (
         <Register
+          onRegisterUser={onRegisterUser}
           onBackToLogin={() => setActiveView("login")}
           onShowRecover={() => setActiveView("recover")}
         />

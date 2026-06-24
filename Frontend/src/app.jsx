@@ -1,17 +1,28 @@
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import Auth from "./auth/auth.jsx";
 import Home from "./home/home.jsx";
 import Dashboard from "./dashboard/dashboard.jsx";
 import Purchase from "./purchase/purchase.jsx";
 import "./app.css";
 
+const seedUsers = [
+  { email: "usuario@email.com", password: "123456", name: "Usuario General", role: "user" },
+  { email: "receptor@email.com", password: "123456", name: "Usuario Receptor", role: "user" },
+  { email: "funcionario@email.com", password: "123456", name: "Funcionario Mundial", role: "worker" },
+  { email: "admin@email.com", password: "123456", name: "Administrador Mundial", role: "admin" },
+];
+
 export default function App() {
   const [page, setPage] = useState("auth");
   const [currentRole, setCurrentRole] = useState("user");
+  const [currentUser, setCurrentUser] = useState(null);
   const [selectedMatch, setSelectedMatch] = useState(null);
   const [ownedTickets, setOwnedTickets] = useState([]);
+  const [registeredUsers, setRegisteredUsers] = useState([]);
   const [notification, setNotification] = useState(null);
   const notificationTimerRef = useRef(null);
+
+  const users = useMemo(() => [...seedUsers, ...registeredUsers], [registeredUsers]);
 
   const showNotification = (message, type = "success") => {
     if (notificationTimerRef.current) {
@@ -30,19 +41,63 @@ export default function App() {
     setPage("purchase");
   };
 
-  const handleLoginSuccess = (role) => {
-    const nextRole = role || "user";
+  const handleLoginSuccess = ({ email, password }) => {
+    const normalizedEmail = email.trim().toLowerCase();
+    const foundUser = users.find((user) => user.email === normalizedEmail);
+
+    if (!foundUser || foundUser.password !== password) {
+      showNotification("Correo o contraseña incorrectos.", "error");
+      return;
+    }
+
+    const nextRole = foundUser.role || "user";
+    setCurrentUser(foundUser);
     setCurrentRole(nextRole);
     setPage(nextRole === "admin" ? "admin" : nextRole === "worker" ? "worker" : "home");
   };
 
+  const handleRegisterUser = ({ name, email, password }) => {
+    const normalizedEmail = email.trim().toLowerCase();
+    const existingUser = users.some((user) => user.email === normalizedEmail);
+
+    if (existingUser) {
+      showNotification("Ya existe una cuenta registrada con ese correo.", "error");
+      return false;
+    }
+
+    const newUser = {
+      email: normalizedEmail,
+      password,
+      name: name.trim(),
+      role: "user",
+    };
+
+    setRegisteredUsers((currentUsers) => [...currentUsers, newUser]);
+    setCurrentUser(newUser);
+    setCurrentRole("user");
+    setPage("home");
+    showNotification("Usuario registrado correctamente.", "success");
+    return true;
+  };
+
   const handleConfirmPurchase = (ticketData) => {
+    if (!currentUser) {
+      showNotification("Iniciá sesión para comprar entradas.", "error");
+      setPage("auth");
+      return;
+    }
+
     setOwnedTickets((currentTickets) => [
       ...currentTickets,
       {
         ...ticketData,
         id: `${ticketData.matchId}-${Date.now()}`,
-        currentHolder: ticketData.buyerName || ticketData.buyerEmail || "Titular",
+        purchasedByEmail: currentUser.email,
+        purchasedByName: currentUser.name,
+        currentHolderEmail: currentUser.email,
+        currentHolder: currentUser.name,
+        transferHistory: [],
+        pendingTransfer: null,
       },
     ]);
     setSelectedMatch(null);
@@ -50,18 +105,111 @@ export default function App() {
   };
 
   const handleTransferTicket = (ticketId, recipient) => {
+    const normalizedRecipient = recipient.trim().toLowerCase();
+    const recipientUser = users.find((user) => user.email === normalizedRecipient);
+
+    if (!recipientUser) {
+      showNotification("El usuario receptor no existe o no está registrado.", "error");
+      return;
+    }
+
+    if (recipientUser.email === currentUser?.email) {
+      showNotification("No podés transferirte una entrada a tu propia cuenta.", "error");
+      return;
+    }
+
     setOwnedTickets((currentTickets) =>
       currentTickets.map((ticket) =>
         ticket.id === ticketId
           ? {
               ...ticket,
-              currentHolder: recipient,
-              transferredTo: recipient,
+              pendingTransfer: {
+                id: `${ticketId}-${Date.now()}`,
+                fromEmail: currentUser.email,
+                fromName: currentUser.name,
+                toEmail: recipientUser.email,
+                toName: recipientUser.name,
+                requestedAt: new Date().toISOString(),
+              },
             }
           : ticket,
       ),
     );
+    showNotification("Transferencia enviada. El receptor debe aceptarla.", "success");
   };
+
+  const handleAcceptTransfer = (ticketId) => {
+    setOwnedTickets((currentTickets) =>
+      currentTickets.map((ticket) => {
+        if (ticket.id !== ticketId || ticket.pendingTransfer?.toEmail !== currentUser?.email) {
+          return ticket;
+        }
+
+        const acceptedTransfer = {
+          ...ticket.pendingTransfer,
+          acceptedAt: new Date().toISOString(),
+        };
+
+        return {
+          ...ticket,
+          currentHolderEmail: currentUser.email,
+          currentHolder: currentUser.name,
+          pendingTransfer: null,
+          transferHistory: [...(ticket.transferHistory || []), acceptedTransfer],
+        };
+      }),
+    );
+    showNotification("Transferencia aceptada. La entrada ahora está en tu poder.", "success");
+  };
+
+  const handleRejectTransfer = (ticketId) => {
+    setOwnedTickets((currentTickets) =>
+      currentTickets.map((ticket) =>
+        ticket.id === ticketId && ticket.pendingTransfer?.toEmail === currentUser?.email
+          ? {
+              ...ticket,
+              pendingTransfer: null,
+            }
+          : ticket,
+      ),
+    );
+    showNotification("Transferencia rechazada.", "success");
+  };
+
+  const handleLogout = () => {
+    setCurrentUser(null);
+    setCurrentRole("user");
+    setPage("auth");
+  };
+
+  const currentUserTickets = useMemo(() => {
+    if (!currentUser) {
+      return {
+        purchasedTickets: [],
+        heldTickets: [],
+        pendingReceivedTransfers: [],
+        transferHistory: [],
+      };
+    }
+
+    const purchasedTickets = ownedTickets.filter((ticket) => ticket.purchasedByEmail === currentUser.email);
+    const heldTickets = ownedTickets.filter((ticket) => ticket.currentHolderEmail === currentUser.email);
+    const pendingReceivedTransfers = ownedTickets.filter((ticket) => ticket.pendingTransfer?.toEmail === currentUser.email);
+    const transferHistory = ownedTickets.flatMap((ticket) =>
+      (ticket.transferHistory || [])
+        .filter((transfer) => transfer.toEmail === currentUser.email || transfer.fromEmail === currentUser.email)
+        .map((transfer) => ({
+          ...transfer,
+          ticketId: ticket.id,
+          matchName: `${ticket.selection} vs ${ticket.rival}`,
+          competition: ticket.competition,
+          date: ticket.date,
+          time: ticket.time,
+        })),
+    );
+
+    return { purchasedTickets, heldTickets, pendingReceivedTransfers, transferHistory };
+  }, [currentUser, ownedTickets]);
 
   return (
     <>
@@ -71,22 +219,35 @@ export default function App() {
         </div>
       )}
 
-      {page === "auth" && <Auth onLoginSuccess={handleLoginSuccess} />}
+      {page === "auth" && (
+        <Auth
+          users={users}
+          onLoginSuccess={handleLoginSuccess}
+          onRegisterUser={handleRegisterUser}
+          onNotify={showNotification}
+        />
+      )}
 
       {page === "home" && (
         <Home
-          ownedTickets={ownedTickets}
+          currentUser={currentUser}
+          purchasedTickets={currentUserTickets.purchasedTickets}
+          heldTickets={currentUserTickets.heldTickets}
+          pendingReceivedTransfers={currentUserTickets.pendingReceivedTransfers}
+          transferHistory={currentUserTickets.transferHistory}
           onBuyTicket={handleBuyTicket}
           onTransferTicket={handleTransferTicket}
+          onAcceptTransfer={handleAcceptTransfer}
+          onRejectTransfer={handleRejectTransfer}
           onNotify={showNotification}
-          onLogout={() => setPage("auth")}
+          onLogout={handleLogout}
         />
       )}
 
       {(page === "worker" || page === "admin") && (
         <Dashboard
           role={currentRole}
-          onLogout={() => setPage("auth")}
+          onLogout={handleLogout}
           onNotify={showNotification}
         />
       )}

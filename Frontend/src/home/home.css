@@ -211,6 +211,31 @@
 	gap: 1rem;
 }
 
+.home-ticketTabs {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.6rem;
+	margin-bottom: 1rem;
+}
+
+.home-ticketTabs button {
+	border: 1px solid #d8ece0;
+	border-radius: 999px;
+	background: #f2faf5;
+	color: #214438;
+	padding: 0.72rem 0.9rem;
+	font: inherit;
+	font-size: 0.88rem;
+	font-weight: 900;
+	cursor: pointer;
+}
+
+.home-ticketTabs button.is-active {
+	background: linear-gradient(135deg, #c9182b 0%, #f7f7f2 49%, #087a45 100%);
+	color: #15251e;
+	border-color: transparent;
+}
+
 .ticket-card {
 	border-radius: 22px;
 	padding: 1.15rem;
@@ -298,6 +323,12 @@
 .ticket-card__action {
 	background: linear-gradient(135deg, #d9252a 0%, #a71622 45%, #0b8f4c 100%);
 	color: #fff;
+}
+
+.ticket-card__action:disabled {
+	cursor: not-allowed;
+	opacity: 0.7;
+	transform: none;
 }
 
 .ticket-card__secondary {
@@ -452,6 +483,28 @@
 	margin-top: 0.5rem;
 }
 
+.home-historyList {
+	display: grid;
+	gap: 0.75rem;
+}
+
+.home-historyItem {
+	padding: 1rem;
+	border-radius: 18px;
+	background: #fbfdfb;
+	border: 1px solid #d8ece0;
+	color: #17251f;
+}
+
+.home-historyItem h3 {
+	margin: 0.1rem 0 0.35rem;
+}
+
+.home-historyItem p {
+	margin: 0.25rem 0 0;
+	color: #415066;
+}
+
 @media (max-width: 900px) {
 	.home-hero,
 	.home-filters,
@@ -471,6 +524,11 @@
 
 	.home-ticketGrid {
 		grid-template-columns: 1fr;
+	}
+
+	.home-ticketTabs {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
 	}
 
 	.home-ticketsPanel__header {
@@ -503,5 +561,135 @@
 
 	.home-actions {
 		flex-direction: column;
+	}
+
+	.home-ticketTabs {
+		grid-template-columns: 1fr;
+	}
+}
+
+.home-page {
+	background:
+		linear-gradient(115deg, rgba(7, 112, 61, 0.94) 0%, rgba(7, 112, 61, 0.9) 35%, rgba(255, 255, 255, 0.96) 35%, rgba(255, 255, 255, 0.96) 42%, rgba(189, 22, 35, 0.94) 42%, rgba(189, 22, 35, 0.93) 100%),
+		repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.1) 0 1px, transparent 1px 96px),
+		linear-gradient(135deg, #06713f 0%, #f7faf8 50%, #b91524 100%);
+	position: relative;
+	overflow-x: hidden;
+}
+
+.home-page::before {
+	content: "";
+	position: fixed;
+	inset: 1rem;
+	border: 1px solid rgba(255, 255, 255, 0.22);
+	border-radius: 30px;
+	pointer-events: none;
+}
+
+.home-hero,
+.home-filterField,
+.home-actionButton,
+.home-logout,
+.home-heroStats article {
+	box-shadow: 0 18px 45px rgba(51, 18, 24, 0.16);
+}
+
+.home-hero {
+	background:
+		linear-gradient(135deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.1)),
+		radial-gradient(circle at 88% 20%, rgba(255, 255, 255, 0.28), transparent 24%);
+	border-color: rgba(255, 255, 255, 0.34);
+}
+
+.home-title {
+	max-width: 14ch;
+	letter-spacing: 0;
+	text-shadow: 0 18px 36px rgba(67, 18, 23, 0.2);
+}
+
+.home-kicker,
+.home-sectionKicker {
+	font-weight: 900;
+}
+
+.home-heroStats article,
+.home-actionButton,
+.home-logout,
+.home-filterField {
+	border-radius: 16px;
+	background: rgba(255, 255, 255, 0.18);
+}
+
+.home-actionButton,
+.home-logout {
+	transition: transform 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+}
+
+.home-actionButton:hover,
+.home-logout:hover,
+.match-card__buy:hover,
+.ticket-card__action:hover {
+	transform: translateY(-2px);
+}
+
+.home-actionButton--primary,
+.match-card__buy,
+.ticket-card__action {
+	background: linear-gradient(135deg, #c9182b 0%, #f7f7f2 49%, #087a45 100%);
+	color: #15251e;
+	box-shadow: 0 16px 34px rgba(91, 21, 28, 0.22);
+}
+
+.home-search,
+.home-select {
+	background: rgba(255, 255, 255, 0.92);
+	border-color: rgba(255, 255, 255, 0.6);
+}
+
+.match-card,
+.home-ticketsPanel,
+.home-empty {
+	border-radius: 22px;
+	border: 1px solid rgba(255, 255, 255, 0.72);
+	box-shadow: 0 24px 60px rgba(51, 18, 24, 0.16);
+}
+
+.match-card,
+.ticket-card {
+	position: relative;
+	overflow: hidden;
+}
+
+.match-card::before,
+.ticket-card::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	height: 6px;
+	background: linear-gradient(90deg, #087a45 0 33%, #fff 33% 66%, #c9182b 66% 100%);
+}
+
+.match-card__badge,
+.ticket-card__badge,
+.home-sectionKicker {
+	color: #087a45;
+}
+
+.match-card__price,
+.ticket-card__price,
+.match-card__chips span {
+	background: #f2faf5;
+	border: 1px solid #d8ece0;
+}
+
+.match-card__title,
+.ticket-card__title {
+	color: #17251f;
+}
+
+@media (max-width: 600px) {
+	.home-page::before {
+		inset: 0.5rem;
+		border-radius: 22px;
 	}
 }
