@@ -1,0 +1,5 @@
+- Se pueden comprar 5 entradas máximo
+- Chequear el estado de la entrada en el proceso de compra
+- Log histórico de transferencias
+- Transferencia de entrada máximo 3 veces
+- Código auto-generado cada 30 segundos
