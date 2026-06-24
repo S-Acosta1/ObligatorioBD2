@@ -1,4 +1,13 @@
-# ObligatorioBD2
+# Obligatorio Bases de Datos 2
+
+Este proyecto es una implementación del trabajo obligatorio de Bases de Datos 2
+planteado en 2026, un sistema integral de ticketing.
+
+El proyecto consiste de 3 partes: un backend escrito en C# (en [./Backend]), un
+frontend escrito en React (en [./Frontend/]), y una base de datos MySQL para
+almacenar los datos. Para el desarrollo se utiilizó una base de datos local,
+pero la base provista por la catedra se utilizó para hacer las pruebas finales
+de funcionalidad.
 
 ## Correr con docker
 
