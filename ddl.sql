@@ -291,3 +291,25 @@ CREATE TABLE TokenQR (
 
     CONSTRAINT ck_token_estado  CHECK (estado IN ('ACTIVO','EXPIRADO','CONSUMIDO'))
 );
+
+CREATE TABLE Verificacion (
+	id_verificacion INTEGER AUTO_INCREMENT PRIMARY KEY,
+	fecha_hora TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	estado      VARCHAR(20) NOT NULL DEFAULT 'INVALIDO',
+	id_token INTEGER NOT NULL,
+	email_funcionario VARCHAR(120) NOT NULL,
+	id_escaner INTEGER NOT NULL,
+	nombre_estadio VARCHAR(100) NOT NULL,
+	id_entrada INTEGER NOT NULL,
+
+    CONSTRAINT fk_verificacion_token FOREIGN KEY (id_token) REFERENCES TokenQR(id_token),
+
+    CONSTRAINT fk_verificacion_escaner
+	FOREIGN KEY (email_funcionario, id_escaner, nombre_estadio)
+	REFERENCES FuncionarioEscaner(email_funcionario, id_escaner, nombre_estadio),
+
+    CONSTRAINT fk_verificacion_entrada FOREIGN KEY (id_entrada) REFERENCES Entrada(id_entrada),
+
+
+    CONSTRAINT ck_verificacion_estado  CHECK (estado IN ('VALIDO','INVALIDO','CONSUMIDO'))
+);
