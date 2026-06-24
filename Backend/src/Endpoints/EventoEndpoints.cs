@@ -10,7 +10,7 @@ public static class EventoEndpoints
         app.MapGet("/api/eventos/{id:int}", GetEventoById);
     }
 
-    private static async Task<IResult> GetEventoById(int id, DbConnectionProvider db)
+    private static async Task<IResult> GetEventoById(int id, IAdministradorLecturaDatabase db)
     {
         using var conn = db.CreateConnection();
         conn.Open();

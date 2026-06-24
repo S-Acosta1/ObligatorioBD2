@@ -26,6 +26,11 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ConnectionStrings__DefaultConnection: "Server=mysql;Database=ticketing2026;User=root;Password=contra-grupo10;"
+      DatabaseUsers__Usuario__Password: "contra-grupo10"
+      DatabaseUsers__UsuarioLectura__Password: "contra-grupo10"
+      DatabaseUsers__Funcionario__Password: "contra-grupo10"
+      DatabaseUsers__Administrador__Password: "contra-grupo10"
+      DatabaseUsers__AdministradorLectura__Password: "contra-grupo10"
     depends_on:
       mysql:
         condition: service_healthy

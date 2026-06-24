@@ -9,6 +9,11 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       ConnectionStrings__DefaultConnection: ${ConnectionStrings__DefaultConnection}
+      DatabaseUsers__Usuario__Password: ${DatabaseUsers__Usuario__Password}
+      DatabaseUsers__UsuarioLectura__Password: ${DatabaseUsers__UsuarioLectura__Password}
+      DatabaseUsers__Funcionario__Password: ${DatabaseUsers__Funcionario__Password}
+      DatabaseUsers__Administrador__Password: ${DatabaseUsers__Administrador__Password}
+      DatabaseUsers__AdministradorLectura__Password: ${DatabaseUsers__AdministradorLectura__Password}
     restart: unless-stopped
 
   frontend:
