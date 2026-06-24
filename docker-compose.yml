@@ -1,0 +1,46 @@
+services:
+  mysql:
+    image: mysql:8
+    container_name: ticketing-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: contra-grupo10
+      MYSQL_DATABASE: ticketing2026
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./ddl.sql:/docker-entrypoint-initdb.d/01-ddl.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pcontra-grupo10"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
+    container_name: ticketing-backend
+    ports:
+      - "5167:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DefaultConnection: "Server=mysql;Database=ticketing2026;User=root;Password=contra-grupo10;"
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile
+    container_name: ticketing-frontend
+    ports:
+      - "5173:80"
+    environment:
+      VITE_API_URL: http://localhost:5167
+    depends_on:
+      - backend
+
+volumes:
+  mysql-data:
