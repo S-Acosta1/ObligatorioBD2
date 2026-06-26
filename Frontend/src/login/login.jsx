@@ -23,15 +23,8 @@ export default function Login({ error, onShowRegister, onShowRecover, onLoginSuc
         <div className="login-header">
           <p className="login-kicker">Mundial 2026</p>
           <h1 className="login-title">Tu acceso a los partidos más esperados.</h1>
-          <p className="login-subtitle">
-            Ingresá para comprar entradas, gestionar tu cuenta o recuperar el acceso si lo necesitás.
-          </p>
+          
         </div>
-
-        <div className="login-intro">
-          <p>Ingresá con tu correo y contraseña. El perfil se obtiene desde la cuenta registrada.</p>
-        </div>
-
         {error && <div className="login-error">{error}</div>}
 
         <form className="login-form" onSubmit={handleSubmit}>
@@ -57,11 +50,6 @@ export default function Login({ error, onShowRegister, onShowRecover, onLoginSuc
               onChange={(e) => setPassword(e.target.value)}
               required
             />
-          </div>
-
-          <div className="login-note">
-            <span>Acceso por cuenta</span>
-            <strong>El sistema abre la vista correspondiente a tu rol.</strong>
           </div>
 
           <button className="login-btn login-btn-primary" type="submit">
