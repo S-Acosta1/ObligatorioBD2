@@ -59,7 +59,7 @@ export default function TicketCard({
 
       <div className="ticket-card__details">
         <p><strong>Cantidad:</strong> {ticket.quantity}</p>
-        <p><strong>Tipo:</strong> {ticket.ticketType.toUpperCase()}</p>
+        <p><strong>Sector:</strong> {ticket.sectorName ? `Sector ${ticket.sectorName}` : ticket.ticketType?.toUpperCase()}</p>
         <p><strong>Documento:</strong> {ticket.documentType === "passport" ? "Pasaporte" : "DNI / CI"} {ticket.documentNumber}</p>
         <p><strong>Comprador:</strong> {ticket.purchasedByName}</p>
         <p><strong>Titular actual:</strong> {ticket.currentHolder}</p>

@@ -66,6 +66,26 @@ export async function fetchEstadios() {
   return response.json();
 }
 
+export async function fetchEventSectors(eventId) {
+  const response = await fetch(`${API_URL}/api/eventos/${eventId}/sectores-habilitados`);
+
+  if (!response.ok) {
+    throw new Error("No se pudieron obtener los sectores del evento.");
+  }
+
+  return response.json();
+}
+
+export async function fetchEvento(id) {
+  const response = await fetch(`${API_URL}/api/eventos/${id}`);
+
+  if (!response.ok) {
+    throw new Error("No se pudo obtener el evento.");
+  }
+
+  return response.json();
+}
+
 export async function fetchEventos() {
   const response = await fetch(`${API_URL}/api/eventos`);
 
