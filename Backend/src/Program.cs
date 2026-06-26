@@ -61,5 +61,6 @@ app.MapEstadioEndpoints();
 app.MapEventoEndpoints();
 app.MapPaisEndpoints();
 app.MapSectorEndpoints();
+app.MapUsuarioEndpoints();
 
 app.Run();
