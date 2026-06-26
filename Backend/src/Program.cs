@@ -77,5 +77,7 @@ app.MapEventoEndpoints();
 app.MapPaisEndpoints();
 app.MapSectorEndpoints();
 app.MapUsuarioEndpoints();
+app.MapEscanerEndpoints();
+app.MapAdminReportEndpoints();
 
 app.Run();
