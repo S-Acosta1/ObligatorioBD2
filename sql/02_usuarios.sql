@@ -23,7 +23,7 @@ GRANT SELECT ON ticketing2026.Estadio TO 'db_usuario'@'%';
 GRANT SELECT ON ticketing2026.Sector TO 'db_usuario'@'%';
 GRANT SELECT ON ticketing2026.Equipo TO 'db_usuario'@'%';
 GRANT SELECT ON ticketing2026.Evento TO 'db_usuario'@'%';
-GRANT SELECT ON ticketing2026.EventoHabilitaSector TO 'db_usuario'@'%';
+GRANT SELECT, UPDATE ON ticketing2026.EventoHabilitaSector TO 'db_usuario'@'%';
 GRANT SELECT ON ticketing2026.Comision TO 'db_usuario'@'%';
 GRANT SELECT, INSERT ON ticketing2026.Compra TO 'db_usuario'@'%';
 GRANT SELECT, INSERT ON ticketing2026.CompraAplicaComision TO 'db_usuario'@'%';
