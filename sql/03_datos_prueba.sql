@@ -123,11 +123,13 @@ INSERT INTO `EventoHabilitaSector` (`id_evento`, `id_sector`, `nombre_estadio`, 
 --
 
 INSERT INTO `Usuario` VALUES
-	('test@example.com','Usuario Test','b460b1982188f11d175f60ed670027e1afdd16558919fe47023ecd38329e0b7f',1,'12345678','URU',1,'URU'); -- Contra hola123
+	('test@example.com','Usuario Test','b460b1982188f11d175f60ed670027e1afdd16558919fe47023ecd38329e0b7f',1,'12345678','URU',1,'URU'), -- Contra hola123
+	('test1@example.com','Usuario Test 1','b460b1982188f11d175f60ed670027e1afdd16558919fe47023ecd38329e0b7f',1,'87654321','URU',1,'URU'); -- Contra hola123
 
 --
 -- Dumping data for table `UsuarioGeneral`
 --
 
 INSERT INTO `UsuarioGeneral` VALUES
-	('test@example.com','PENDIENTE','2026-06-26 07:58:22');
+	('test@example.com','VERIFICADO','2026-06-26 07:58:22'),
+	('test1@example.com','VERIFICADO','2026-06-26 07:58:22');
