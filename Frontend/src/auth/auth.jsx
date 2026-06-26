@@ -4,7 +4,7 @@ import Register from "../register/register.jsx";
 import Recover from "../recover/recover.jsx";
 import "./auth.css";
 
-export default function Auth({ users = [], onLoginSuccess, onRegisterUser, onNotify }) {
+export default function Auth({ loginError, onLoginSuccess, onRegisterUser, onNotify, onClearLoginError }) {
   const [activeView, setActiveView] = useState("login");
 
   return (
@@ -18,9 +18,9 @@ export default function Auth({ users = [], onLoginSuccess, onRegisterUser, onNot
         </p>
 
         <div className="auth-tabs" role="tablist" aria-label="Opciones de autenticación">
-          <button type="button" className={`auth-tab ${activeView === "login" ? "is-active" : ""}`} onClick={() => setActiveView("login")}>Ingresar</button>
-          <button type="button" className={`auth-tab ${activeView === "register" ? "is-active" : ""}`} onClick={() => setActiveView("register")}>Crear usuario</button>
-          <button type="button" className={`auth-tab ${activeView === "recover" ? "is-active" : ""}`} onClick={() => setActiveView("recover")}>Recuperar contraseña</button>
+          <button type="button" className={`auth-tab ${activeView === "login" ? "is-active" : ""}`} onClick={() => { setActiveView("login"); onClearLoginError?.(); }}>Ingresar</button>
+          <button type="button" className={`auth-tab ${activeView === "register" ? "is-active" : ""}`} onClick={() => { setActiveView("register"); onClearLoginError?.(); }}>Crear usuario</button>
+          <button type="button" className={`auth-tab ${activeView === "recover" ? "is-active" : ""}`} onClick={() => { setActiveView("recover"); onClearLoginError?.(); }}>Recuperar contraseña</button>
         </div>
 
         <div className="auth-highlights" aria-label="Beneficios">
@@ -37,9 +37,9 @@ export default function Auth({ users = [], onLoginSuccess, onRegisterUser, onNot
 
       {activeView === "login" && (
         <Login
-          users={users}
+          error={loginError}
           onLoginSuccess={onLoginSuccess}
-          onNotify={onNotify}
+          onClearError={onClearLoginError}
           onShowRegister={() => setActiveView("register")}
           onShowRecover={() => setActiveView("recover")}
         />

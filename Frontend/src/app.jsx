@@ -3,6 +3,7 @@ import Auth from "./auth/auth.jsx";
 import Home from "./home/home.jsx";
 import Dashboard from "./dashboard/dashboard.jsx";
 import Purchase from "./purchase/purchase.jsx";
+import { login } from "./api.js";
 import "./app.css";
 
 const seedUsers = [
@@ -19,6 +20,7 @@ export default function App() {
   const [selectedMatch, setSelectedMatch] = useState(null);
   const [ownedTickets, setOwnedTickets] = useState([]);
   const [registeredUsers, setRegisteredUsers] = useState([]);
+  const [loginError, setLoginError] = useState(null);
   const [notification, setNotification] = useState(null);
   const notificationTimerRef = useRef(null);
 
@@ -41,20 +43,26 @@ export default function App() {
     setPage("purchase");
   };
 
-  const handleLoginSuccess = ({ email, password }) => {
-    const normalizedEmail = email.trim().toLowerCase();
-    const foundUser = users.find((user) => user.email === normalizedEmail);
+  const handleLoginSuccess = async ({ email, password }) => {
+    setLoginError(null);
+    try {
+      const data = await login(email, password);
+      const roleMap = { admin: "admin", funcionario: "worker", usuario: "user" };
+      const nextRole = roleMap[data.role] || "user";
+      const user = { email: data.email, nombre: data.nombre, role: data.role };
 
-    if (!foundUser || foundUser.password !== password) {
-      showNotification("Correo o contraseña incorrectos.", "error");
-      return;
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(user));
+
+      setCurrentUser(user);
+      setCurrentRole(nextRole);
+      setPage(nextRole === "admin" ? "admin" : nextRole === "worker" ? "worker" : "home");
+    } catch (err) {
+      setLoginError(err.message);
     }
-
-    const nextRole = foundUser.role || "user";
-    setCurrentUser(foundUser);
-    setCurrentRole(nextRole);
-    setPage(nextRole === "admin" ? "admin" : nextRole === "worker" ? "worker" : "home");
   };
+
+  const handleClearLoginError = () => setLoginError(null);
 
   const handleRegisterUser = ({ name, email, password }) => {
     const normalizedEmail = email.trim().toLowerCase();
@@ -221,10 +229,11 @@ export default function App() {
 
       {page === "auth" && (
         <Auth
-          users={users}
+          loginError={loginError}
           onLoginSuccess={handleLoginSuccess}
           onRegisterUser={handleRegisterUser}
           onNotify={showNotification}
+          onClearLoginError={handleClearLoginError}
         />
       )}
 

@@ -1,20 +1,14 @@
 import { useState } from "react";
 import "./login.css";
 
-export default function Login({ users = [], onShowRegister, onShowRecover, onLoginSuccess, onNotify }) {
+export default function Login({ error, onShowRegister, onShowRecover, onLoginSuccess, onClearError }) {
   const [correo, setCorreo] = useState("");
   const [password, setPassword] = useState("");
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    const normalizedEmail = correo.trim().toLowerCase();
-
-    if (!users.some((user) => user.email === normalizedEmail)) {
-      onNotify?.("No hay una cuenta registrada con ese correo.", "error");
-      return;
-    }
-
-    onLoginSuccess?.({ email: normalizedEmail, password });
+    onClearError?.();
+    onLoginSuccess?.({ email: correo.trim().toLowerCase(), password });
   };
 
   return (
@@ -37,6 +31,8 @@ export default function Login({ users = [], onShowRegister, onShowRecover, onLog
         <div className="login-intro">
           <p>Ingresá con tu correo y contraseña. El perfil se obtiene desde la cuenta registrada.</p>
         </div>
+
+        {error && <div className="login-error">{error}</div>}
 
         <form className="login-form" onSubmit={handleSubmit}>
           <div className="login-field">

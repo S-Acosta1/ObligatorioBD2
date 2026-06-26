@@ -52,6 +52,21 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 
+app.Use(async (context, next) =>
+{
+    context.Response.Headers["Access-Control-Allow-Origin"] = "*";
+    context.Response.Headers["Access-Control-Allow-Headers"] = "*";
+    context.Response.Headers["Access-Control-Allow-Methods"] = "*";
+
+    if (context.Request.Method == "OPTIONS")
+    {
+        context.Response.StatusCode = 204;
+        return;
+    }
+
+    await next();
+});
+
 app.UseAuthentication();
 app.UseAuthorization();
 
