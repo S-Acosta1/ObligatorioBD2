@@ -24,7 +24,11 @@ public static class AuthEndpoints
         var hash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(request.Password))).ToLower();
 
         var cmd = conn.CreateCommand();
-        cmd.CommandText = "SELECT email, nombre FROM Usuario WHERE email = @email AND hash_contra = @hash";
+        cmd.CommandText = @"
+            SELECT u.email, u.nombre, ug.estado_verificacion
+            FROM Usuario u
+            LEFT JOIN UsuarioGeneral ug ON u.email = ug.email
+            WHERE u.email = @email AND u.hash_contra = @hash";
         cmd.Parameters.Add(new MySql.Data.MySqlClient.MySqlParameter("@email", request.Email));
         cmd.Parameters.Add(new MySql.Data.MySqlClient.MySqlParameter("@hash", hash));
 
@@ -34,6 +38,11 @@ public static class AuthEndpoints
 
         var email = reader.GetString(0);
         var nombre = reader.GetString(1);
+        var estadoVerificacion = reader.IsDBNull(2) ? null : reader.GetString(2);
+
+        if (estadoVerificacion == "RECHAZADO")
+            return Results.Json(new { mensaje = "Tu cuenta ha sido rechazada. No puedes iniciar sesión." }, statusCode: 403);
+
         reader.Close();
 
         var role = GetUserRole(email, db);
