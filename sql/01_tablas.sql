@@ -327,6 +327,7 @@ CREATE TABLE Verificacion (
 
 DELIMITER $$
 
+-- Iniciar asientos disponibles como capacidad del sector
 CREATE TRIGGER trg_ehs_cap_maxima
 BEFORE INSERT ON EventoHabilitaSector
 FOR EACH ROW
@@ -344,6 +345,7 @@ BEGIN
     SET NEW.asientos_disponibles = cap;
 END$$
 
+-- Asientos disponibles nunca puede ser mayor a la capacidad
 CREATE TRIGGER trg_ehs_before_update
 BEFORE UPDATE ON EventoHabilitaSector
 FOR EACH ROW
@@ -358,6 +360,8 @@ BEGIN
     END IF;
 END$$
 
+-- Si cambio la capacidad de un sector, no puedo tener demasiadas entradas
+-- sacadas para un evento
 CREATE TRIGGER trg_sector_before_update_cap
 BEFORE UPDATE ON Sector
 FOR EACH ROW
@@ -378,6 +382,8 @@ BEGIN
     END IF;
 END$$
 
+-- Si cambio la capacidad de un sector, actualizar la cantidad disponible
+-- de los eventos
 CREATE TRIGGER trg_sector_after_update_cap
 AFTER UPDATE ON Sector
 FOR EACH ROW
@@ -392,6 +398,8 @@ BEGIN
     END IF;
 END$$
 
+-- Cada entrada que saco para un evento disminuye los disponibles
+-- del evento por 1, y además su precio es el precio del sector
 CREATE TRIGGER trg_entrada_before_insert
 BEFORE INSERT ON Entrada
 FOR EACH ROW
@@ -416,6 +424,7 @@ BEGIN
       AND nombre_estadio = NEW.nombre_estadio;
 END$$
 
+-- Si anulo una entrada, hay otro asiento más disponible
 CREATE TRIGGER trg_entrada_after_update_anulada
 AFTER UPDATE ON Entrada
 FOR EACH ROW
@@ -429,6 +438,7 @@ BEGIN
     END IF;
 END$$
 
+-- No puedo transferir la misma entrada más de 3 veces
 CREATE TRIGGER trg_check_entrada_transfer_limit
 BEFORE INSERT ON TransferenciaContieneEntrada
 FOR EACH ROW
