@@ -21,6 +21,7 @@ export default function Partidos() {
         date,
         time,
         price: 0,
+        asientosDisponibles: e.asientosDisponibles,
       };
     }),
   [eventos]);
@@ -79,6 +80,7 @@ export default function Partidos() {
               <p><strong>Fecha:</strong> {formatDate(match.date)} · {match.time}</p>
               <p><strong>Estadio:</strong> {match.stadium}</p>
               <p><strong>Ciudad:</strong> {match.city}</p>
+              <p><strong>Asientos disponibles:</strong> {match.asientosDisponibles}</p>
             </div>
             <div className="match-card__chips">
               <span>{match.stadium}</span>

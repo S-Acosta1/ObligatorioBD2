@@ -27,11 +27,15 @@ public static class EventoEndpoints
         var cmd = conn.CreateCommand();
         cmd.CommandText = @"
             SELECT e.id_evento, est.nombre, el.nombre, ev.nombre,
-                   e.fecha_hora, e.ubicacion
+                   e.fecha_hora, e.ubicacion,
+                   COALESCE(SUM(ehs.asientos_disponibles), 0) AS asientos_disponibles
             FROM Evento e
             JOIN Estadio est ON est.nombre = e.nombre_estadio
             JOIN Equipo el  ON el.nombre = e.nombre_equipo_a AND el.cod_pais = e.pais_equipo_a
             JOIN Equipo ev  ON ev.nombre = e.nombre_equipo_b AND ev.cod_pais = e.pais_equipo_b
+            LEFT JOIN EventoHabilitaSector ehs ON ehs.id_evento = e.id_evento
+            GROUP BY e.id_evento, est.nombre, el.nombre, ev.nombre,
+                     e.fecha_hora, e.ubicacion
             ORDER BY e.fecha_hora DESC";
 
         using var reader = cmd.ExecuteReader();
@@ -45,7 +49,8 @@ public static class EventoEndpoints
                 equipoLocal = reader.GetString(2),
                 equipoVisitante = reader.GetString(3),
                 fechaHora = reader.GetDateTime(4),
-                ubicacion = reader.GetString(5)
+                ubicacion = reader.GetString(5),
+                asientosDisponibles = reader.GetInt32(6)
             });
         }
 
@@ -177,7 +182,7 @@ public static class EventoEndpoints
 
         var cmd = conn.CreateCommand();
         cmd.CommandText = @"
-            SELECT s.id_sector, s.nombre, s.capacidad_maxima
+            SELECT s.id_sector, s.nombre, s.capacidad_maxima, ehs.asientos_disponibles
             FROM EventoHabilitaSector ehs
             JOIN Sector s ON s.id_sector = ehs.id_sector AND s.nombre_estadio = ehs.nombre_estadio
             WHERE ehs.id_evento = @id
@@ -192,7 +197,8 @@ public static class EventoEndpoints
             {
                 idSector = reader.GetInt32(0),
                 nombre = reader.GetString(1),
-                capacidadMaxima = reader.GetInt32(2)
+                capacidadMaxima = reader.GetInt32(2),
+                asientosDisponibles = reader.GetInt32(3)
             });
         }
 
@@ -236,15 +242,32 @@ public static class EventoEndpoints
         using var conn = db.CreateConnection();
         conn.Open();
 
+        var check = conn.CreateCommand();
+        check.CommandText = @"
+            SELECT ehs.asientos_disponibles, s.capacidad_maxima
+            FROM EventoHabilitaSector ehs
+            JOIN Sector s ON s.id_sector = ehs.id_sector AND s.nombre_estadio = ehs.nombre_estadio
+            WHERE ehs.id_evento = @idEvento AND ehs.id_sector = @idSector";
+        check.Parameters.Add(new MySql.Data.MySqlClient.MySqlParameter("@idEvento", idEvento));
+        check.Parameters.Add(new MySql.Data.MySqlClient.MySqlParameter("@idSector", idSector));
+
+        using var reader = check.ExecuteReader();
+        if (!reader.Read())
+            return Results.NotFound(new { mensaje = "Sector no habilitado para este evento" });
+
+        var disponibles = reader.GetInt32(0);
+        var capacidad = reader.GetInt32(1);
+        reader.Close();
+
+        if (disponibles != capacidad)
+            return Results.Conflict(new { mensaje = "No se puede deshabilitar un sector con entradas vendidas" });
+
         var cmd = conn.CreateCommand();
         cmd.CommandText = "DELETE FROM EventoHabilitaSector WHERE id_evento = @idEvento AND id_sector = @idSector";
         cmd.Parameters.Add(new MySql.Data.MySqlClient.MySqlParameter("@idEvento", idEvento));
         cmd.Parameters.Add(new MySql.Data.MySqlClient.MySqlParameter("@idSector", idSector));
 
-        int rows = cmd.ExecuteNonQuery();
-        if (rows == 0)
-            return Results.NotFound(new { mensaje = "Sector no habilitado para este evento" });
-
+        cmd.ExecuteNonQuery();
         return Results.NoContent();
     }
 }
