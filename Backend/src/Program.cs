@@ -55,10 +55,11 @@ if (app.Environment.IsDevelopment())
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapEventoEndpoints();
-app.MapEstadioEndpoints();
-app.MapPaisEndpoints();
-app.MapEquipoEndpoints();
 app.MapAuthEndpoints();
+app.MapEquipoEndpoints();
+app.MapEstadioEndpoints();
+app.MapEventoEndpoints();
+app.MapPaisEndpoints();
+app.MapSectorEndpoints();
 
 app.Run();
