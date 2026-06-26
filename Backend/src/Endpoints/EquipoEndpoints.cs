@@ -7,7 +7,8 @@ public static class EquipoEndpoints
 {
     public static void MapEquipoEndpoints(this WebApplication app)
     {
-        app.MapPost("/api/equipos", Create);
+        var admin = app.MapGroup("/api/equipos").RequireAuthorization("AdminOnly");
+        admin.MapPost("/", Create);
     }
 
     private static async Task<IResult> Create(Equipo equipo, IAdministradorDatabase db)

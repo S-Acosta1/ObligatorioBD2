@@ -10,9 +10,11 @@ public static class EstadioEndpoints
         app.MapGet("/api/estadios", GetAll);
         app.MapGet("/api/estadios/pais/{codPais}", GetByPais);
         app.MapGet("/api/estadios/{nombre}", GetByNombre);
-        app.MapPost("/api/estadios", Create);
-        app.MapPut("/api/estadios/{nombre}", Update);
-        app.MapDelete("/api/estadios/{nombre}", Delete);
+
+        var admin = app.MapGroup("/api/estadios").RequireAuthorization("AdminOnly");
+        admin.MapPost("/", Create);
+        admin.MapPut("/{nombre}", Update);
+        admin.MapDelete("/{nombre}", Delete);
     }
 
     private static async Task<IResult> GetAll(IAdministradorLecturaDatabase db)
