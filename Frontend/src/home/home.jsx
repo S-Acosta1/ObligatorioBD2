@@ -2,19 +2,13 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Outlet } from "react-router-dom";
 import TabBar from "./TabBar";
+import useTicketTransfers from "./useTicketTransfers";
 import { fetchEventos } from "../api";
 import "./home.css";
 
 export default function Home({
   currentUser,
-  purchasedTickets = [],
-  heldTickets = [],
-  pendingReceivedTransfers = [],
-  transferHistory = [],
   onBuyTicket,
-  onTransferTicket,
-  onAcceptTransfer,
-  onRejectTransfer,
   onNotify,
   onLogout,
 }) {
@@ -22,6 +16,16 @@ export default function Home({
   const location = useLocation();
   const activeTab = location.pathname === "/home/entradas" ? "tickets" : "matches";
   const [eventos, setEventos] = useState([]);
+
+  const {
+    purchasedTickets,
+    heldTickets,
+    pendingReceivedTransfers,
+    transferHistory,
+    handleTransferTicket,
+    handleAcceptTransfer,
+    handleRejectTransfer,
+  } = useTicketTransfers(currentUser, onNotify);
 
   useEffect(() => {
     fetchEventos()
@@ -55,7 +59,7 @@ export default function Home({
         </div>
       </header>
 
-      <Outlet context={{ currentUser, purchasedTickets, heldTickets, pendingReceivedTransfers, transferHistory, onBuyTicket, onTransferTicket, onAcceptTransfer, onRejectTransfer, onNotify, eventos }} />
+      <Outlet context={{ currentUser, purchasedTickets, heldTickets, pendingReceivedTransfers, transferHistory, onBuyTicket, onTransferTicket: handleTransferTicket, onAcceptTransfer: handleAcceptTransfer, onRejectTransfer: handleRejectTransfer, onNotify, eventos }} />
     </main>
   );
 }

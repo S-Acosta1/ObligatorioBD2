@@ -11,6 +11,7 @@ function formatDate(dateValue) {
 
 export default function TicketCard({
   ticket,
+  currentUser,
   canTransfer = false,
   isPendingTransfer = false,
   pendingDirection = "",
@@ -22,6 +23,8 @@ export default function TicketCard({
   const navigate = useNavigate();
   const [isTransferring, setIsTransferring] = useState(false);
   const [recipient, setRecipient] = useState("");
+
+  const isNotHeld = currentUser && ticket.currentHolderEmail !== currentUser.email && ticket.ultimoDestinatario;
 
   const startTransfer = () => {
     navigate("/home/entradas");
@@ -40,10 +43,10 @@ export default function TicketCard({
   };
 
   return (
-    <article className="ticket-card">
+    <article className={`ticket-card${isNotHeld ? " ticket-card--not-held" : ""}`}>
       <div className="ticket-card__top">
         <div>
-          <p className="ticket-card__badge">{ticket.competition}</p>
+          <p className={`ticket-card__badge${isNotHeld ? " ticket-card__badge--transferred" : ""}`}>{isNotHeld ? "TRANSFERIDA" : ticket.competition}</p>
           <h3 className="ticket-card__title">
             {ticket.selection} vs {ticket.rival}
           </h3>
@@ -60,7 +63,11 @@ export default function TicketCard({
       <div className="ticket-card__details">
         <p><strong>Sector:</strong> Sector {ticket.sectorName}</p>
         <p><strong>Comprador:</strong> {ticket.purchasedByName}</p>
-        <p><strong>Titular actual:</strong> {ticket.currentHolder}</p>
+        {currentUser && ticket.currentHolderEmail !== currentUser.email && ticket.ultimoDestinatario ? (
+          <p><strong>Transferida a:</strong> {ticket.ultimoDestinatario}</p>
+        ) : (
+          <p><strong>Titular actual:</strong> {ticket.currentHolder}</p>
+        )}
         <p><strong>Total compra:</strong> ${ticket.totalPrice}</p>
         <p><strong>Estadio:</strong> {ticket.stadium}</p>
         <p><strong>Ciudad:</strong> {ticket.city}</p>
