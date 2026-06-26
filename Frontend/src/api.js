@@ -115,6 +115,21 @@ export async function createPurchase(data) {
   return response.json();
 }
 
+export async function fetchEntradas(email) {
+  const token = localStorage.getItem("token");
+  const response = await fetch(`${API_URL}/api/usuarios/${encodeURIComponent(email)}/entradas`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("No se pudieron obtener las entradas.");
+  }
+
+  return response.json();
+}
+
 export async function fetchProfile(email) {
   const token = localStorage.getItem("token");
   const response = await fetch(`${API_URL}/api/usuarios/${encodeURIComponent(email)}`, {
