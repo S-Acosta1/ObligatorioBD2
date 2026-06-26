@@ -56,6 +56,26 @@ export async function fetchPaises() {
   return response.json();
 }
 
+export async function fetchEstadios() {
+  const response = await fetch(`${API_URL}/api/estadios`);
+
+  if (!response.ok) {
+    throw new Error("No se pudieron obtener los estadios.");
+  }
+
+  return response.json();
+}
+
+export async function fetchEventos() {
+  const response = await fetch(`${API_URL}/api/eventos`);
+
+  if (!response.ok) {
+    throw new Error("No se pudieron obtener los eventos.");
+  }
+
+  return response.json();
+}
+
 export async function fetchProfile(email) {
   const token = localStorage.getItem("token");
   const response = await fetch(`${API_URL}/api/usuarios/${encodeURIComponent(email)}`, {

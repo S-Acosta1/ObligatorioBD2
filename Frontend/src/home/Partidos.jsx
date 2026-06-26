@@ -1,17 +1,40 @@
 import { useMemo, useState } from "react";
 import { useOutletContext } from "react-router-dom";
-import { matches, selectionOptions, formatDate } from "./homeData";
+import { formatDate } from "./homeData";
 
 export default function Partidos() {
-  const { onBuyTicket } = useOutletContext();
+  const { onBuyTicket, eventos } = useOutletContext();
   const [selectionFilter, setSelectionFilter] = useState("Todas");
   const [searchTerm, setSearchTerm] = useState("");
+
+  const matches = useMemo(() =>
+    eventos.map((e) => {
+      const [date, timeFull] = e.fechaHora.split("T");
+      const time = timeFull.slice(0, 5);
+      return {
+        id: e.id,
+        selection: e.equipoLocal,
+        rival: e.equipoVisitante,
+        competition: "",
+        stadium: e.estadio,
+        city: e.ubicacion,
+        date,
+        time,
+        price: 0,
+      };
+    }),
+  [eventos]);
+
+  const selectionOptions = useMemo(() => {
+    const unique = [...new Set(eventos.map((e) => e.equipoLocal))].sort();
+    return ["Todas", ...unique];
+  }, [eventos]);
 
   const futureMatches = useMemo(() => matches.filter((match) => {
     const matchesSelection = selectionFilter === "Todas" || match.selection === selectionFilter;
     const text = `${match.selection} ${match.rival} ${match.competition} ${match.stadium} ${match.city}`.toLowerCase();
     return matchesSelection && text.includes(searchTerm.toLowerCase());
-  }), [selectionFilter, searchTerm]);
+  }), [selectionFilter, searchTerm, matches]);
 
   return (
     <>
@@ -41,14 +64,16 @@ export default function Partidos() {
           <article key={match.id} className="match-card">
             <div className="match-card__top">
               <div>
-                <p className="match-card__badge">{match.competition}</p>
+                {match.competition && <p className="match-card__badge">{match.competition}</p>}
                 <h2 className="match-card__title">{match.selection} vs {match.rival}</h2>
                 <p className="match-card__subtitle">{formatDate(match.date)} · {match.time}</p>
               </div>
-              <div className="match-card__price">
-                <span>Desde</span>
-                <strong>${match.price}</strong>
-              </div>
+              {match.price > 0 && (
+                <div className="match-card__price">
+                  <span>Desde</span>
+                  <strong>${match.price}</strong>
+                </div>
+              )}
             </div>
             <div className="match-card__details">
               <p><strong>Fecha:</strong> {formatDate(match.date)} · {match.time}</p>
