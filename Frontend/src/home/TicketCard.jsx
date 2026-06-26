@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import QrCodeModal from "./QrCodeModal";
 
 function formatDate(dateValue) {
   return new Intl.DateTimeFormat("es-ES", {
@@ -23,6 +24,7 @@ export default function TicketCard({
   const navigate = useNavigate();
   const [isTransferring, setIsTransferring] = useState(false);
   const [recipient, setRecipient] = useState("");
+  const [showQr, setShowQr] = useState(false);
 
   const isNotHeld = currentUser && ticket.currentHolderEmail !== currentUser.email && ticket.ultimoDestinatario;
 
@@ -87,8 +89,17 @@ export default function TicketCard({
           >
             {ticket.pendingTransfer ? "Esperando confirmación" : "Transferir"}
           </button>
+          <button
+            type="button"
+            className="ticket-card__action"
+            onClick={() => setShowQr(true)}
+          >
+            Generar QR
+          </button>
         </div>
       )}
+
+      {showQr && <QrCodeModal ticketId={ticket.id} onClose={() => setShowQr(false)} />}
 
       {isPendingTransfer && (
         <div className="ticket-card__actions">

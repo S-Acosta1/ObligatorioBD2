@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using ObligatorioAPI.Data;
 using ObligatorioAPI.Endpoints;
+using ObligatorioAPI.Services;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +16,8 @@ builder.Services.AddSingleton<IUsuarioLecturaDatabase, UsuarioLecturaDatabase>()
 builder.Services.AddSingleton<IFuncionarioDatabase, FuncionarioDatabase>();
 builder.Services.AddSingleton<IAdministradorDatabase, AdministradorDatabase>();
 builder.Services.AddSingleton<IAdministradorLecturaDatabase, AdministradorLecturaDatabase>();
+builder.Services.AddSingleton<QrCodeService>();
+builder.Services.AddHostedService<QrCodeRotationService>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -82,5 +85,6 @@ app.MapEscanerEndpoints();
 app.MapAdminReportEndpoints();
 app.MapCompraEndpoints();
 app.MapTransferenciaEndpoints();
+app.MapQrEndpoints();
 
 app.Run();
