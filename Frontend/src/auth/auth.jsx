@@ -1,12 +1,7 @@
-import { useState } from "react";
-import Login from "../login/login.jsx";
-import Register from "../register/register.jsx";
-import Recover from "../recover/recover.jsx";
+import { NavLink } from "react-router-dom";
 import "./auth.css";
 
-export default function Auth({ loginError, onLoginSuccess, onRegisterUser, onNotify, onClearLoginError }) {
-  const [activeView, setActiveView] = useState("login");
-
+export default function AuthLayout({ children }) {
   return (
     <main className="auth-shell">
       <section className="auth-hero" aria-label="Acceso al sistema">
@@ -18,9 +13,15 @@ export default function Auth({ loginError, onLoginSuccess, onRegisterUser, onNot
         </p>
 
         <div className="auth-tabs" role="tablist" aria-label="Opciones de autenticación">
-          <button type="button" className={`auth-tab ${activeView === "login" ? "is-active" : ""}`} onClick={() => { setActiveView("login"); onClearLoginError?.(); }}>Ingresar</button>
-          <button type="button" className={`auth-tab ${activeView === "register" ? "is-active" : ""}`} onClick={() => { setActiveView("register"); onClearLoginError?.(); }}>Crear usuario</button>
-          <button type="button" className={`auth-tab ${activeView === "recover" ? "is-active" : ""}`} onClick={() => { setActiveView("recover"); onClearLoginError?.(); }}>Recuperar contraseña</button>
+          <NavLink to="/login" className={({ isActive }) => `auth-tab ${isActive ? "is-active" : ""}`} onClick={() => { /* error cleared by parent */ }}>
+            Ingresar
+          </NavLink>
+          <NavLink to="/register" className={({ isActive }) => `auth-tab ${isActive ? "is-active" : ""}`}>
+            Crear usuario
+          </NavLink>
+          <NavLink to="/recover" className={({ isActive }) => `auth-tab ${isActive ? "is-active" : ""}`}>
+            Recuperar contraseña
+          </NavLink>
         </div>
 
         <div className="auth-highlights" aria-label="Beneficios">
@@ -35,30 +36,7 @@ export default function Auth({ loginError, onLoginSuccess, onRegisterUser, onNot
         </div>
       </section>
 
-      {activeView === "login" && (
-        <Login
-          error={loginError}
-          onLoginSuccess={onLoginSuccess}
-          onClearError={onClearLoginError}
-          onShowRegister={() => setActiveView("register")}
-          onShowRecover={() => setActiveView("recover")}
-        />
-      )}
-
-      {activeView === "register" && (
-        <Register
-          onRegisterUser={onRegisterUser}
-          onBackToLogin={() => setActiveView("login")}
-          onShowRecover={() => setActiveView("recover")}
-        />
-      )}
-
-      {activeView === "recover" && (
-        <Recover
-          onBackToLogin={() => setActiveView("login")}
-          onShowRegister={() => setActiveView("register")}
-        />
-      )}
+      {children}
     </main>
   );
 }

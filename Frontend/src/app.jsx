@@ -1,6 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { jwtDecode } from "jwt-decode";
-import Auth from "./auth/auth.jsx";
+import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import AuthLayout from "./auth/auth.jsx";
+import Login from "./login/login.jsx";
+import Register from "./register/register.jsx";
+import Recover from "./recover/recover.jsx";
 import Home from "./home/home.jsx";
 import Dashboard from "./dashboard/dashboard.jsx";
 import Purchase from "./purchase/purchase.jsx";
@@ -14,8 +18,57 @@ const seedUsers = [
   { email: "admin@email.com", password: "123456", name: "Administrador Mundial", role: "admin" },
 ];
 
+function ProtectedRoute({ children, requiredRole }) {
+  const token = localStorage.getItem("token");
+
+  const isExpired = () => {
+    try {
+      const { exp } = jwtDecode(token);
+      return exp * 1000 < Date.now();
+    } catch {
+      return true;
+    }
+  };
+
+  if (!token || isExpired()) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (requiredRole) {
+    try {
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      const roleMap = { admin: "admin", funcionario: "worker", usuario: "user" };
+      const role = roleMap[user.role] || "user";
+      if (role !== requiredRole) {
+        return <Navigate to="/" replace />;
+      }
+    } catch {
+      return <Navigate to="/login" replace />;
+    }
+  }
+
+  return children;
+}
+
+function RootRedirect() {
+  const token = localStorage.getItem("token");
+
+  if (token) {
+    try {
+      const { exp } = jwtDecode(token);
+      if (exp * 1000 > Date.now()) {
+        return <Navigate to="/home" replace />;
+      }
+    } catch {
+      /* invalid token — redirect to login */
+    }
+  }
+
+  return <Navigate to="/login" replace />;
+}
+
 export default function App() {
-  const [page, setPage] = useState("auth");
+  const navigate = useNavigate();
   const [currentRole, setCurrentRole] = useState("user");
   const [currentUser, setCurrentUser] = useState(null);
   const [selectedMatch, setSelectedMatch] = useState(null);
@@ -49,7 +102,6 @@ export default function App() {
       const nextRole = roleMap[user.role] || "user";
       setCurrentUser(user);
       setCurrentRole(nextRole);
-      setPage(nextRole === "admin" ? "admin" : nextRole === "worker" ? "worker" : "home");
       return;
     }
 
@@ -65,12 +117,12 @@ export default function App() {
         clearSession();
         setCurrentUser(null);
         setCurrentRole("user");
-        setPage("auth");
+        navigate("/login");
       }
     }, 10000);
 
     return () => clearInterval(interval);
-  }, [currentUser]);
+  }, [currentUser, navigate]);
 
   const users = useMemo(() => [...seedUsers, ...registeredUsers], [registeredUsers]);
 
@@ -88,7 +140,7 @@ export default function App() {
 
   const handleBuyTicket = (match) => {
     setSelectedMatch(match);
-    setPage("purchase");
+    navigate("/purchase");
   };
 
   const handleLoginSuccess = async ({ email, password }) => {
@@ -104,7 +156,7 @@ export default function App() {
 
       setCurrentUser(user);
       setCurrentRole(nextRole);
-      setPage(nextRole === "admin" ? "admin" : nextRole === "worker" ? "worker" : "home");
+      navigate(nextRole === "admin" ? "/admin" : nextRole === "worker" ? "/worker" : "/home");
     } catch (err) {
       setLoginError(err.message);
     }
@@ -131,7 +183,7 @@ export default function App() {
     setRegisteredUsers((currentUsers) => [...currentUsers, newUser]);
     setCurrentUser(newUser);
     setCurrentRole("user");
-    setPage("home");
+    navigate("/home");
     showNotification("Usuario registrado correctamente.", "success");
     return true;
   };
@@ -139,7 +191,7 @@ export default function App() {
   const handleConfirmPurchase = (ticketData) => {
     if (!currentUser) {
       showNotification("Iniciá sesión para comprar entradas.", "error");
-      setPage("auth");
+      navigate("/login");
       return;
     }
 
@@ -157,7 +209,7 @@ export default function App() {
       },
     ]);
     setSelectedMatch(null);
-    setPage("home");
+    navigate("/home");
   };
 
   const handleTransferTicket = (ticketId, recipient) => {
@@ -236,7 +288,7 @@ export default function App() {
     clearSession();
     setCurrentUser(null);
     setCurrentRole("user");
-    setPage("auth");
+    navigate("/login");
   };
 
   const currentUserTickets = useMemo(() => {
@@ -276,48 +328,75 @@ export default function App() {
         </div>
       )}
 
-      {page === "auth" && (
-        <Auth
-          loginError={loginError}
-          onLoginSuccess={handleLoginSuccess}
-          onRegisterUser={handleRegisterUser}
-          onNotify={showNotification}
-          onClearLoginError={handleClearLoginError}
-        />
-      )}
-
-      {page === "home" && (
-        <Home
-          currentUser={currentUser}
-          purchasedTickets={currentUserTickets.purchasedTickets}
-          heldTickets={currentUserTickets.heldTickets}
-          pendingReceivedTransfers={currentUserTickets.pendingReceivedTransfers}
-          transferHistory={currentUserTickets.transferHistory}
-          onBuyTicket={handleBuyTicket}
-          onTransferTicket={handleTransferTicket}
-          onAcceptTransfer={handleAcceptTransfer}
-          onRejectTransfer={handleRejectTransfer}
-          onNotify={showNotification}
-          onLogout={handleLogout}
-        />
-      )}
-
-      {(page === "worker" || page === "admin") && (
-        <Dashboard
-          role={currentRole}
-          onLogout={handleLogout}
-          onNotify={showNotification}
-        />
-      )}
-
-      {page === "purchase" && (
-        <Purchase
-          selectedMatch={selectedMatch}
-          onConfirmPurchase={handleConfirmPurchase}
-          onNotify={showNotification}
-          onBackToHome={() => setPage("home")}
-        />
-      )}
+      <Routes>
+        <Route path="/login" element={
+          <AuthLayout>
+            <Login
+              error={loginError}
+              onLoginSuccess={handleLoginSuccess}
+              onClearError={handleClearLoginError}
+              onShowRegister={() => { setLoginError(null); navigate("/register"); }}
+              onShowRecover={() => { setLoginError(null); navigate("/recover"); }}
+            />
+          </AuthLayout>
+        } />
+        <Route path="/register" element={
+          <AuthLayout>
+            <Register
+              onRegisterUser={handleRegisterUser}
+              onBackToLogin={() => navigate("/login")}
+              onShowRecover={() => navigate("/recover")}
+            />
+          </AuthLayout>
+        } />
+        <Route path="/recover" element={
+          <AuthLayout>
+            <Recover
+              onBackToLogin={() => navigate("/login")}
+              onShowRegister={() => navigate("/register")}
+            />
+          </AuthLayout>
+        } />
+        <Route path="/home" element={
+          <ProtectedRoute>
+            <Home
+              currentUser={currentUser}
+              purchasedTickets={currentUserTickets.purchasedTickets}
+              heldTickets={currentUserTickets.heldTickets}
+              pendingReceivedTransfers={currentUserTickets.pendingReceivedTransfers}
+              transferHistory={currentUserTickets.transferHistory}
+              onBuyTicket={handleBuyTicket}
+              onTransferTicket={handleTransferTicket}
+              onAcceptTransfer={handleAcceptTransfer}
+              onRejectTransfer={handleRejectTransfer}
+              onNotify={showNotification}
+              onLogout={handleLogout}
+            />
+          </ProtectedRoute>
+        } />
+        <Route path="/admin" element={
+          <ProtectedRoute requiredRole="admin">
+            <Dashboard role="admin" onLogout={handleLogout} onNotify={showNotification} />
+          </ProtectedRoute>
+        } />
+        <Route path="/worker" element={
+          <ProtectedRoute requiredRole="worker">
+            <Dashboard role="worker" onLogout={handleLogout} onNotify={showNotification} />
+          </ProtectedRoute>
+        } />
+        <Route path="/purchase" element={
+          <ProtectedRoute>
+            <Purchase
+              selectedMatch={selectedMatch}
+              onConfirmPurchase={handleConfirmPurchase}
+              onNotify={showNotification}
+              onBackToHome={() => navigate("/home")}
+            />
+          </ProtectedRoute>
+        } />
+        <Route path="/" element={<RootRedirect />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
     </>
   );
 }
