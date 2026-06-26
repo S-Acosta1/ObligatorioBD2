@@ -693,3 +693,15 @@
 		border-radius: 22px;
 	}
 }
+
+.home-heroStats{
+    grid-template-columns: repeat(4,1fr);
+}
+
+.match-card h2{
+    margin-bottom: .8rem;
+}
+
+.match-card p{
+    margin-bottom: 1.4rem;
+}

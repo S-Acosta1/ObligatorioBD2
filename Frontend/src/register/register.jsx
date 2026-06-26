@@ -37,12 +37,6 @@ export default function Register({ onRegisterUser, onBackToLogin, onShowRecover 
         <div className="register-header">
           <div className="register-logoIcon">🎟️</div>
           <h1 className="register-title">Crear usuario</h1>
-          <p className="register-subtitle">Crea tu perfil para comprar entradas y guardar tus partidos favoritos.</p>
-        </div>
-
-        <div className="register-note">
-          <strong>Una cuenta, varias compras.</strong>
-          <span>Guardá tu información para acelerar futuras adquisiciones.</span>
         </div>
 
         <form className="register-form" onSubmit={handleSubmit}>
