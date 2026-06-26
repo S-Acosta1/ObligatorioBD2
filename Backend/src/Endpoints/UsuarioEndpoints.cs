@@ -23,10 +23,12 @@ public static class UsuarioEndpoints
         var cmd = conn.CreateCommand();
         cmd.CommandText = @"
             SELECT u.email, u.nombre, u.tipo_documento, u.numero_documento,
-                   u.cod_pais_documento, u.id_direccion, u.cod_pais_direccion,
-                   ug.estado_verificacion
+                   u.cod_pais_documento, u.cod_pais_direccion,
+                   ug.estado_verificacion,
+                   d.calle, d.localidad, d.codigo_postal
             FROM Usuario u
             LEFT JOIN UsuarioGeneral ug ON ug.email = u.email
+            LEFT JOIN Direccion d ON d.id_direccion = u.id_direccion AND d.cod_pais = u.cod_pais_direccion
             WHERE u.email = @email";
         cmd.Parameters.Add(new MySql.Data.MySqlClient.MySqlParameter("@email", email));
 
@@ -41,9 +43,11 @@ public static class UsuarioEndpoints
             tipoDocumento = reader.GetString(2),
             numeroDocumento = reader.GetString(3),
             codPaisDocumento = reader.GetString(4),
-            idDireccion = reader.GetInt32(5),
-            codPaisDireccion = reader.GetString(6),
-            estadoVerificacion = reader.IsDBNull(7) ? null : reader.GetString(7)
+            codPaisDireccion = reader.GetString(5),
+            estadoVerificacion = reader.IsDBNull(6) ? null : reader.GetString(6),
+            calle = reader.IsDBNull(7) ? null : reader.GetString(7),
+            localidad = reader.IsDBNull(8) ? null : reader.GetString(8),
+            codigoPostal = reader.IsDBNull(9) ? null : reader.GetString(9),
         });
     }
 }

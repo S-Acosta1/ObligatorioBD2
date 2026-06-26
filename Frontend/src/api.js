@@ -19,3 +19,18 @@ export async function login(email, password) {
 
   return response.json();
 }
+
+export async function fetchProfile(email) {
+  const token = localStorage.getItem("token");
+  const response = await fetch(`${API_URL}/api/usuarios/${encodeURIComponent(email)}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("No se pudo obtener el perfil.");
+  }
+
+  return response.json();
+}
