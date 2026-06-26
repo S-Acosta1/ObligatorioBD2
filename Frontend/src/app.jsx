@@ -4,7 +4,6 @@ import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import AuthLayout from "./auth/auth.jsx";
 import Login from "./login/login.jsx";
 import Register from "./register/register.jsx";
-import Recover from "./recover/recover.jsx";
 import Home from "./home/home.jsx";
 import Dashboard from "./dashboard/dashboard.jsx";
 import Purchase from "./purchase/purchase.jsx";
@@ -74,7 +73,6 @@ export default function App() {
   const [currentUser, setCurrentUser] = useState(null);
   const [selectedMatch, setSelectedMatch] = useState(null);
   const [ownedTickets, setOwnedTickets] = useState([]);
-  const [registeredUsers, setRegisteredUsers] = useState([]);
   const [loginError, setLoginError] = useState(null);
   const [notification, setNotification] = useState(null);
   const notificationTimerRef = useRef(null);
@@ -125,7 +123,7 @@ export default function App() {
     return () => clearInterval(interval);
   }, [currentUser, navigate]);
 
-  const users = useMemo(() => [...seedUsers, ...registeredUsers], [registeredUsers]);
+  const users = useMemo(() => [...seedUsers], []);
 
   const showNotification = (message, type = "success") => {
     if (notificationTimerRef.current) {
@@ -164,30 +162,6 @@ export default function App() {
   };
 
   const handleClearLoginError = () => setLoginError(null);
-
-  const handleRegisterUser = ({ name, email, password }) => {
-    const normalizedEmail = email.trim().toLowerCase();
-    const existingUser = users.some((user) => user.email === normalizedEmail);
-
-    if (existingUser) {
-      showNotification("Ya existe una cuenta registrada con ese correo.", "error");
-      return false;
-    }
-
-    const newUser = {
-      email: normalizedEmail,
-      password,
-      name: name.trim(),
-      role: "user",
-    };
-
-    setRegisteredUsers((currentUsers) => [...currentUsers, newUser]);
-    setCurrentUser(newUser);
-    setCurrentRole("user");
-    navigate("/home");
-    showNotification("Usuario registrado correctamente.", "success");
-    return true;
-  };
 
   const handleConfirmPurchase = (ticketData) => {
     if (!currentUser) {
@@ -337,24 +311,13 @@ export default function App() {
               onLoginSuccess={handleLoginSuccess}
               onClearError={handleClearLoginError}
               onShowRegister={() => { setLoginError(null); navigate("/register"); }}
-              onShowRecover={() => { setLoginError(null); navigate("/recover"); }}
             />
           </AuthLayout>
         } />
         <Route path="/register" element={
           <AuthLayout>
             <Register
-              onRegisterUser={handleRegisterUser}
               onBackToLogin={() => navigate("/login")}
-              onShowRecover={() => navigate("/recover")}
-            />
-          </AuthLayout>
-        } />
-        <Route path="/recover" element={
-          <AuthLayout>
-            <Recover
-              onBackToLogin={() => navigate("/login")}
-              onShowRegister={() => navigate("/register")}
             />
           </AuthLayout>
         } />

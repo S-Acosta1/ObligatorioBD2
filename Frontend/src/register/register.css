@@ -211,3 +211,53 @@
 .register-link-button {
 	color: #087a45;
 }
+
+.register-card {
+	max-width: 500px;
+}
+
+.register-fieldset {
+	border: 1px solid #d8e0ec;
+	border-radius: 14px;
+	padding: 1rem 1.1rem;
+	margin-bottom: 1rem;
+}
+
+.register-legend {
+	font-size: 0.82rem;
+	font-weight: 800;
+	color: #5c6a78;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	padding: 0 0.4rem;
+}
+
+.register-row {
+	display: flex;
+	gap: 0.75rem;
+}
+
+.register-field--half {
+	flex: 1;
+}
+
+.register-select {
+	appearance: none;
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%235c6a78' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+	background-repeat: no-repeat;
+	background-position: right 1rem center;
+	padding-right: 2.5rem;
+	cursor: pointer;
+}
+
+.register-btn-primary:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+
+@media (max-width: 600px) {
+	.register-row {
+		flex-direction: column;
+		gap: 0;
+	}
+}
