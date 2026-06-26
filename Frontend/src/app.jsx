@@ -1,4 +1,5 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { jwtDecode } from "jwt-decode";
 import Auth from "./auth/auth.jsx";
 import Home from "./home/home.jsx";
 import Dashboard from "./dashboard/dashboard.jsx";
@@ -23,6 +24,53 @@ export default function App() {
   const [loginError, setLoginError] = useState(null);
   const [notification, setNotification] = useState(null);
   const notificationTimerRef = useRef(null);
+
+  const isTokenExpired = (token) => {
+    try {
+      const { exp } = jwtDecode(token);
+      return exp * 1000 < Date.now();
+    } catch {
+      return true;
+    }
+  };
+
+  const clearSession = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+  };
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const userJson = localStorage.getItem("user");
+
+    if (token && userJson && !isTokenExpired(token)) {
+      const user = JSON.parse(userJson);
+      const roleMap = { admin: "admin", funcionario: "worker", usuario: "user" };
+      const nextRole = roleMap[user.role] || "user";
+      setCurrentUser(user);
+      setCurrentRole(nextRole);
+      setPage(nextRole === "admin" ? "admin" : nextRole === "worker" ? "worker" : "home");
+      return;
+    }
+
+    clearSession();
+  }, []);
+
+  useEffect(() => {
+    if (!currentUser) return;
+
+    const interval = setInterval(() => {
+      const token = localStorage.getItem("token");
+      if (token && isTokenExpired(token)) {
+        clearSession();
+        setCurrentUser(null);
+        setCurrentRole("user");
+        setPage("auth");
+      }
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, [currentUser]);
 
   const users = useMemo(() => [...seedUsers, ...registeredUsers], [registeredUsers]);
 
@@ -185,6 +233,7 @@ export default function App() {
   };
 
   const handleLogout = () => {
+    clearSession();
     setCurrentUser(null);
     setCurrentRole("user");
     setPage("auth");
