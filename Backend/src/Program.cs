@@ -9,6 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
 builder.Services.AddSingleton<DbConnectionProvider>();
+builder.Services.AddSingleton<IAuthDatabase, AuthDatabase>();
 builder.Services.AddSingleton<IUsuarioDatabase, UsuarioDatabase>();
 builder.Services.AddSingleton<IUsuarioLecturaDatabase, UsuarioLecturaDatabase>();
 builder.Services.AddSingleton<IFuncionarioDatabase, FuncionarioDatabase>();

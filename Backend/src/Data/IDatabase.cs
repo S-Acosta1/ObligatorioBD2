@@ -7,11 +7,17 @@ public interface IDatabase
     IDbConnection CreateConnection();
 }
 
+public interface IAuthDatabase : IDatabase { }
 public interface IUsuarioDatabase : IDatabase { }
 public interface IUsuarioLecturaDatabase : IDatabase { }
 public interface IFuncionarioDatabase : IDatabase { }
 public interface IAdministradorDatabase : IDatabase { }
 public interface IAdministradorLecturaDatabase : IDatabase { }
+
+internal sealed class AuthDatabase(DbConnectionProvider provider) : IAuthDatabase
+{
+    public IDbConnection CreateConnection() => provider.CreateConnection("Auth");
+}
 
 internal sealed class UsuarioDatabase(DbConnectionProvider provider) : IUsuarioDatabase
 {

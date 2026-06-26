@@ -1,8 +1,16 @@
+CREATE USER IF NOT EXISTS 'db_auth'@'%' IDENTIFIED BY 'contra-grupo10';
 CREATE USER IF NOT EXISTS 'db_usuario'@'%' IDENTIFIED BY 'contra-grupo10';
 CREATE USER IF NOT EXISTS 'db_usuario_lectura'@'%' IDENTIFIED BY 'contra-grupo10';
 CREATE USER IF NOT EXISTS 'db_funcionario'@'%' IDENTIFIED BY 'contra-grupo10';
 CREATE USER IF NOT EXISTS 'db_administrador'@'%' IDENTIFIED BY 'contra-grupo10';
 CREATE USER IF NOT EXISTS 'db_administrador_lectura'@'%' IDENTIFIED BY 'contra-grupo10';
+
+GRANT SELECT, INSERT ON ticketing2026.Documento TO 'db_auth'@'%';
+GRANT SELECT, INSERT ON ticketing2026.Direccion TO 'db_auth'@'%';
+GRANT SELECT, INSERT ON ticketing2026.Usuario TO 'db_auth'@'%';
+GRANT SELECT ON ticketing2026.Administrador TO 'db_auth'@'%';
+GRANT SELECT ON ticketing2026.Funcionario TO 'db_auth'@'%';
+GRANT SELECT, INSERT ON ticketing2026.UsuarioGeneral TO 'db_auth'@'%';
 
 GRANT SELECT ON ticketing2026.Pais TO 'db_usuario'@'%';
 GRANT SELECT, INSERT ON ticketing2026.Documento TO 'db_usuario'@'%';

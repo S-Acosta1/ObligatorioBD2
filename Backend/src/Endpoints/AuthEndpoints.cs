@@ -16,7 +16,7 @@ public static class AuthEndpoints
         app.MapPost("/api/auth/register", Register);
     }
 
-    private static IResult Login(LoginRequest request, IUsuarioLecturaDatabase db, IConfiguration config)
+    private static IResult Login(LoginRequest request, IAuthDatabase db, IConfiguration config)
     {
         using var conn = db.CreateConnection();
         conn.Open();
@@ -66,7 +66,7 @@ public static class AuthEndpoints
         });
     }
 
-    private static IResult Register(RegisterRequest request, IUsuarioDatabase db)
+    private static IResult Register(RegisterRequest request, IAuthDatabase db)
     {
         using var conn = db.CreateConnection();
         conn.Open();
@@ -138,7 +138,7 @@ public static class AuthEndpoints
         }
     }
 
-    private static string GetUserRole(string email, IUsuarioLecturaDatabase db)
+    private static string GetUserRole(string email, IAuthDatabase db)
     {
         using var conn = db.CreateConnection();
         conn.Open();
