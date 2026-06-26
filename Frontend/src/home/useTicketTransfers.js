@@ -5,6 +5,7 @@ import {
   fetchUserByEmail,
   createTransferencia,
   fetchPendientesRecibidas,
+  fetchHistorialTransferencias,
   acceptTransferencia,
   rejectTransferencia,
 } from "../api";
@@ -12,6 +13,7 @@ import {
 export default function useTicketTransfers(currentUser, onNotify) {
   const [ownedTickets, setOwnedTickets] = useState([]);
   const [pendingTransfers, setPendingTransfers] = useState([]);
+  const [transferHistory, setTransferHistory] = useState([]);
 
   const fetchUserTickets = useCallback(async (email) => {
     try {
@@ -67,14 +69,39 @@ export default function useTicketTransfers(currentUser, onNotify) {
     }
   }, []);
 
+  const fetchHistorial = useCallback(async () => {
+    try {
+      const data = await fetchHistorialTransferencias();
+      const mapped = data.map((t) => {
+        const [date, timeFull] = t.eventoFechaHora.split("T");
+        const time = timeFull?.slice(0, 5) || "";
+        return {
+          id: t.idTransferencia,
+          ticketId: t.idEntrada,
+          matchName: `${t.equipoLocal} vs ${t.equipoVisitante}`,
+          competition: "",
+          date,
+          time,
+          fromName: t.origenNombre,
+          toName: t.recibeNombre,
+          acceptedAt: new Date(t.fechaHora).toISOString(),
+        };
+      });
+      setTransferHistory(mapped);
+    } catch {
+      setTransferHistory([]);
+    }
+  }, []);
+
   useEffect(() => {
     if (currentUser?.email) {
       Promise.all([
         fetchUserTickets(currentUser.email),
         fetchPendingTransfers(),
+        fetchHistorial(),
       ]);
     }
-  }, [currentUser, fetchUserTickets, fetchPendingTransfers]);
+  }, [currentUser, fetchUserTickets, fetchPendingTransfers, fetchHistorial]);
 
   const handleTransferTicket = useCallback(async (ticketId, recipient) => {
     const normalizedRecipient = recipient.trim().toLowerCase();
@@ -119,11 +146,12 @@ export default function useTicketTransfers(currentUser, onNotify) {
       await Promise.all([
         fetchUserTickets(currentUser.email),
         fetchPendingTransfers(),
+        fetchHistorial(),
       ]);
     } catch (err) {
       onNotify?.(err.message, "error");
     }
-  }, [currentUser, onNotify, fetchUserTickets, fetchPendingTransfers]);
+  }, [currentUser, onNotify, fetchUserTickets, fetchPendingTransfers, fetchHistorial]);
 
   const handleRejectTransfer = useCallback(async (transferId) => {
     try {
@@ -132,11 +160,12 @@ export default function useTicketTransfers(currentUser, onNotify) {
       await Promise.all([
         fetchUserTickets(currentUser.email),
         fetchPendingTransfers(),
+        fetchHistorial(),
       ]);
     } catch (err) {
       onNotify?.(err.message, "error");
     }
-  }, [currentUser, onNotify, fetchUserTickets, fetchPendingTransfers]);
+  }, [currentUser, onNotify, fetchUserTickets, fetchPendingTransfers, fetchHistorial]);
 
   const currentUserTickets = useMemo(() => {
     if (!currentUser) {
@@ -184,30 +213,13 @@ export default function useTicketTransfers(currentUser, onNotify) {
       };
     });
 
-    const transferHistory = ownedTickets.flatMap((ticket) =>
-      (ticket.transferHistory || [])
-        .filter(
-          (transfer) =>
-            transfer.toEmail === currentUser.email ||
-            transfer.fromEmail === currentUser.email,
-        )
-        .map((transfer) => ({
-          ...transfer,
-          ticketId: ticket.id,
-          matchName: `${ticket.selection} vs ${ticket.rival}`,
-          competition: ticket.competition,
-          date: ticket.date,
-          time: ticket.time,
-        })),
-    );
-
     return {
       purchasedTickets,
       heldTickets,
       pendingReceivedTransfers,
       transferHistory,
     };
-  }, [currentUser, ownedTickets, pendingTransfers]);
+  }, [currentUser, ownedTickets, pendingTransfers, transferHistory]);
 
   return {
     ...currentUserTickets,
