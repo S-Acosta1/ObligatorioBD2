@@ -1,7 +1,7 @@
 import "./app.css";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { jwtDecode } from "jwt-decode";
 import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import { getToken, getUser, setSession, clearSession, isTokenExpired, getRoleFromUser } from "./token.js";
 import AuthLayout from "./auth/auth.jsx";
 import Login from "./login/login.jsx";
 import Register from "./register/register.jsx";
@@ -25,27 +25,16 @@ const seedUsers = [
 ];
 
 function ProtectedRoute({ children, requiredRole }) {
-  const token = localStorage.getItem("token");
+  const token = getToken();
 
-  const isExpired = () => {
-    try {
-      const { exp } = jwtDecode(token);
-      return exp * 1000 < Date.now();
-    } catch {
-      return true;
-    }
-  };
-
-  if (!token || isExpired()) {
+  if (!token || isTokenExpired(token)) {
     return <Navigate to="/login" replace />;
   }
 
   if (requiredRole) {
     try {
-      const user = JSON.parse(localStorage.getItem("user") || "{}");
-      const roleMap = { admin: "admin", funcionario: "worker", usuario: "user" };
-      const role = roleMap[user.role] || "user";
-      if (role !== requiredRole) {
+      const user = getUser();
+      if (getRoleFromUser(user) !== requiredRole) {
         return <Navigate to="/" replace />;
       }
     } catch {
@@ -57,15 +46,10 @@ function ProtectedRoute({ children, requiredRole }) {
 }
 
 function RootRedirect() {
-  const token = localStorage.getItem("token");
+  const token = getToken();
 
-  if (token) {
-    try {
-      const { exp } = jwtDecode(token);
-      if (exp * 1000 > Date.now()) {
-        return <Navigate to="/home" replace />;
-      }
-    } catch {}
+  if (token && !isTokenExpired(token)) {
+    return <Navigate to="/home" replace />;
   }
 
   return <Navigate to="/login" replace />;
@@ -81,30 +65,13 @@ export default function App() {
   const [notification, setNotification] = useState(null);
   const notificationTimerRef = useRef(null);
 
-  const isTokenExpired = (token) => {
-    try {
-      const { exp } = jwtDecode(token);
-      return exp * 1000 < Date.now();
-    } catch {
-      return true;
-    }
-  };
-
-  const clearSession = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-  };
-
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    const userJson = localStorage.getItem("user");
+    const token = getToken();
+    const user = getUser();
 
-    if (token && userJson && !isTokenExpired(token)) {
-      const user = JSON.parse(userJson);
-      const roleMap = { admin: "admin", funcionario: "worker", usuario: "user" };
-      const nextRole = roleMap[user.role] || "user";
+    if (token && user && !isTokenExpired(token)) {
       setCurrentUser(user);
-      setCurrentRole(nextRole);
+      setCurrentRole(getRoleFromUser(user));
       return;
     }
 
@@ -156,7 +123,7 @@ export default function App() {
     if (!currentUser) return;
 
     const interval = setInterval(() => {
-      const token = localStorage.getItem("token");
+      const token = getToken();
       if (token && isTokenExpired(token)) {
         clearSession();
         setCurrentUser(null);
@@ -190,12 +157,10 @@ export default function App() {
     setLoginError(null);
     try {
       const data = await login(email, password);
-      const roleMap = { admin: "admin", funcionario: "worker", usuario: "user" };
-      const nextRole = roleMap[data.role] || "user";
       const user = { email: data.email, nombre: data.nombre, role: data.role };
+      const nextRole = getRoleFromUser(user);
 
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(user));
+      setSession(data.token, user);
 
       setCurrentUser(user);
       setCurrentRole(nextRole);

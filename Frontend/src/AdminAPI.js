@@ -1,8 +1,6 @@
-const API_URL="http://localhost:5167/api";
+import { getToken } from "./token.js";
 
-function getToken(){
-	return localStorage.getItem("token");
-}
+const API_URL="http://localhost:5167/api";
 
 async function request(url,options={}){
 	const response=await fetch(`${API_URL}${url}`,{

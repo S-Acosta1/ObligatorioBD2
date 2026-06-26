@@ -1,3 +1,5 @@
+import { getToken } from "./token.js";
+
 const API_URL = import.meta.env.VITE_API_URL || null;
 if (API_URL == null) {
 	console.error("Missing VITE_API_URL");
@@ -97,7 +99,7 @@ export async function fetchEventos() {
 }
 
 export async function createPurchase(data) {
-  const token = localStorage.getItem("token");
+  const token = getToken();
   const response = await fetch(`${API_URL}/api/compras`, {
     method: "POST",
     headers: {
@@ -116,7 +118,7 @@ export async function createPurchase(data) {
 }
 
 export async function fetchEntradas(email) {
-  const token = localStorage.getItem("token");
+  const token = getToken();
   const response = await fetch(`${API_URL}/api/usuarios/${encodeURIComponent(email)}/entradas`, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -131,7 +133,7 @@ export async function fetchEntradas(email) {
 }
 
 export async function fetchProfile(email) {
-  const token = localStorage.getItem("token");
+  const token = getToken();
   const response = await fetch(`${API_URL}/api/usuarios/${encodeURIComponent(email)}`, {
     headers: {
       Authorization: `Bearer ${token}`,
