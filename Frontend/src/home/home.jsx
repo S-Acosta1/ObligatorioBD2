@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./home.css";
 
 const matches = [
@@ -71,6 +72,7 @@ export default function Home({
   onNotify,
   onLogout,
 }) {
+  const navigate = useNavigate();
   const [selectionFilter, setSelectionFilter] = useState("Todas");
   const [searchTerm, setSearchTerm] = useState("");
   const [showTickets, setShowTickets] = useState(false);
@@ -276,9 +278,15 @@ export default function Home({
           </div>
         </div>
 
-        <button type="button" className="home-logout" onClick={onLogout}>
-          Cerrar sesión
-        </button>
+        <div className="home-heroActions">
+          <button type="button" className="home-userButton" onClick={() => navigate("/profile")}>
+            <span className="home-userIcon">👤</span>
+            <span className="home-userName">{currentUser?.name || currentUser?.nombre || "Usuario"}</span>
+          </button>
+          <button type="button" className="home-logout" onClick={onLogout}>
+            Cerrar sesión
+          </button>
+        </div>
       </section>
 
       <section className="home-actions" aria-label="Acciones de entradas">
@@ -331,7 +339,7 @@ export default function Home({
           <div className="home-ticketsPanel__header">
             <div>
               <p className="home-sectionKicker">Mis entradas</p>
-              <h2>{currentUser?.name || "Usuario"} · gestión de entradas</h2>
+              <h2>{currentUser?.name || currentUser?.nombre || "Usuario"} · gestión de entradas</h2>
             </div>
             <p>{heldTickets.length} en poder · {purchasedTickets.length} compradas</p>
           </div>

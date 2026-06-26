@@ -8,6 +8,7 @@ import Recover from "./recover/recover.jsx";
 import Home from "./home/home.jsx";
 import Dashboard from "./dashboard/dashboard.jsx";
 import Purchase from "./purchase/purchase.jsx";
+import Profile from "./profile/profile.jsx";
 import { login } from "./api.js";
 import "./app.css";
 
@@ -391,6 +392,14 @@ export default function App() {
               onConfirmPurchase={handleConfirmPurchase}
               onNotify={showNotification}
               onBackToHome={() => navigate("/home")}
+            />
+          </ProtectedRoute>
+        } />
+        <Route path="/profile" element={
+          <ProtectedRoute>
+            <Profile
+              currentUser={currentUser}
+              onLogout={handleLogout}
             />
           </ProtectedRoute>
         } />
