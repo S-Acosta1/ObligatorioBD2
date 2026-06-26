@@ -1,5 +1,5 @@
 import { useEffect,useState } from "react";
-import "./homeUG.css";
+import "../home/homeUG.css";
 import {
 	getEquipos,
 	crearEquipo,
@@ -12,7 +12,7 @@ import {
 	getEscaners,
 	crearEscaner,
 	eliminarEscaner
-} from "../api/AdminAPI";
+} from "../AdminAPI";
 
 export default function AdminConfiguracion({onBack}){
 
