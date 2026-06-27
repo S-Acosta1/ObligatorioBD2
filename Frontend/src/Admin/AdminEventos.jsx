@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getEventos, crearEvento, habilitarSector } from "../AdminAPI";
+import { getEventos, crearEvento, habilitarSector } from "../api";
 
 export default function AdminEventos() {
   const [events, setEvents] = useState([]);

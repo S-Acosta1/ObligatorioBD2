@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getRankingCompradores, getEventosMayorVenta } from "../AdminAPI";
+import { getRankingCompradores, getEventosMayorVenta } from "../api";
 
 export default function AdminReportes() {
   const [ranking, setRanking] = useState([]);
