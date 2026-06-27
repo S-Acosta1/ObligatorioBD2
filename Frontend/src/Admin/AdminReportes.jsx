@@ -21,7 +21,7 @@ export default function AdminReportes() {
       <div className="admin-list">
         {ranking.map((r, i) => (
           <div className="admin-list-item" key={i}>
-            <span>{r.nombre}: {r.totalCompras}</span>
+            <span>{r.nombre}: {r.totalGastado}</span>
           </div>
         ))}
       </div>
@@ -30,7 +30,7 @@ export default function AdminReportes() {
       <div className="admin-list">
         {ventas.map((e, i) => (
           <div className="admin-list-item" key={i}>
-            <span>{e.equipoLocal} vs {e.equipoVisitante}</span>
+            <span>{e.equipoLocal} vs {e.equipoVisitante} — {e.entradasVendidas} entradas (${e.montoVendido})</span>
           </div>
         ))}
       </div>

@@ -218,39 +218,39 @@ export async function eliminarEscaner(id, nombreEstadio) {
 // ── Funcionarios ──
 
 export async function getFuncionarios() {
-  return request("/funcionarios", { auth: true });
+  return request("/admin/funcionarios", { auth: true });
 }
 
 export async function crearFuncionario(data) {
-  return request("/funcionarios", { method: "POST", body: JSON.stringify(data), auth: true });
+  return request("/admin/funcionarios", { method: "POST", body: JSON.stringify(data), auth: true });
 }
 
 export async function eliminarFuncionario(email) {
-  return request(`/funcionarios/${email}`, { method: "DELETE", auth: true });
+  return request(`/admin/funcionarios/${email}`, { method: "DELETE", auth: true });
 }
 
 export async function modificarFuncionario(email, data) {
-  return request(`/funcionarios/${email}`, { method: "PUT", body: JSON.stringify(data), auth: true });
+  return request(`/admin/funcionarios/${email}`, { method: "PUT", body: JSON.stringify(data), auth: true });
 }
 
 // ── Asignaciones ──
 
 export async function asignarFuncionario(data) {
-  return request("/asignaciones", { method: "POST", body: JSON.stringify(data), auth: true });
+  return request("/admin/asignaciones", { method: "POST", body: JSON.stringify(data), auth: true });
 }
 
 export async function desasignarFuncionario(data) {
-  return request("/asignaciones", { method: "DELETE", body: JSON.stringify(data), auth: true });
+  return request("/admin/asignaciones", { method: "DELETE", body: JSON.stringify(data), auth: true });
 }
 
 // ── Reportes ──
 
 export async function getRankingCompradores() {
-  return request("/reportes/ranking-compradores", { auth: true });
+  return request("/admin/reportes/ranking-compradores", { auth: true });
 }
 
 export async function getEventosMayorVenta() {
-  return request("/reportes/eventos-mayores-ventas", { auth: true });
+  return request("/admin/reportes/eventos-mayores-ventas", { auth: true });
 }
 
 // ── Entradas / Compras ──
