@@ -104,19 +104,19 @@ INSERT INTO `Evento` VALUES
 -- Dumping data for table `EventoHabilitaSector`
 --
 
-INSERT INTO `EventoHabilitaSector` (`id_evento`, `id_sector`, `nombre_estadio`) VALUES
-	(1,1,'Estadio Azteca'),
-	(1,2,'Estadio Azteca'),
-	(1,3,'Estadio Azteca'),
-	(1,4,'Estadio Azteca'),
-	(2,5,'Estadio BBVA'),
-	(2,6,'Estadio BBVA'),
-	(3,7,'SoFi Stadium'),
-	(3,8,'SoFi Stadium'),
-	(3,9,'SoFi Stadium'),
-	(4,10,'Estadio Akron'),
-	(4,11,'Estadio Akron'),
-	(4,12,'Estadio Akron');
+INSERT INTO `EventoHabilitaSector` (`id_evento`, `id_sector`, `nombre_estadio`, `precio`) VALUES
+	(1,1,'Estadio Azteca',150.00),
+	(1,2,'Estadio Azteca',120.00),
+	(1,3,'Estadio Azteca',80.00),
+	(1,4,'Estadio Azteca',60.00),
+	(2,5,'Estadio BBVA',100.00),
+	(2,6,'Estadio BBVA',70.00),
+	(3,7,'SoFi Stadium',200.00),
+	(3,8,'SoFi Stadium',150.00),
+	(3,9,'SoFi Stadium',90.00),
+	(4,10,'Estadio Akron',110.00),
+	(4,11,'Estadio Akron',75.00),
+	(4,12,'Estadio Akron',55.00);
 
 --
 -- Dumping data for table `Usuario`

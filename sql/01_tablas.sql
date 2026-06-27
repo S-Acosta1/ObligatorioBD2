@@ -146,6 +146,7 @@ CREATE TABLE EventoHabilitaSector (
     id_sector            INTEGER NOT NULL,
     nombre_estadio       VARCHAR(100) NOT NULL,
     asientos_disponibles INTEGER NOT NULL DEFAULT 0,
+	precio               DECIMAL(5, 2) NOT NULL,
 	PRIMARY KEY (id_evento, id_sector, nombre_estadio),
 
     CONSTRAINT fk_habilita_evento
