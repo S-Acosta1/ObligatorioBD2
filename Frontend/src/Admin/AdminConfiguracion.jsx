@@ -10,7 +10,8 @@ import {
   crearSector,
   getEscaners,
   crearEscaner,
-  eliminarEscaner
+  eliminarEscaner,
+  fetchPaises
 } from "../api";
 
 export default function AdminConfiguracion() {
@@ -18,6 +19,7 @@ export default function AdminConfiguracion() {
   const [estadios, setEstadios] = useState([]);
   const [sectores, setSectores] = useState([]);
   const [escaners, setEscaners] = useState([]);
+  const [paises, setPaises] = useState([]);
   const [equipo, setEquipo] = useState({ nombre: "", codPais: "" });
   const [estadio, setEstadio] = useState({ nombre: "", codPais: "" });
   const [sector, setSector] = useState({ nombre: "", capacidadMaxima: "" });
@@ -29,6 +31,7 @@ export default function AdminConfiguracion() {
       setEquipos(await getEquipos());
       setEstadios(await getEstadios());
       setEscaners(await getEscaners());
+      setPaises(await fetchPaises());
     } catch (error) {
       console.error(error);
     }
@@ -76,9 +79,14 @@ export default function AdminConfiguracion() {
           <input className="admin-input" placeholder="Nombre"
             value={equipo.nombre}
             onChange={e => setEquipo({ ...equipo, nombre: e.target.value })} />
-          <input className="admin-input" placeholder="Código país"
+          <select className="admin-input"
             value={equipo.codPais}
-            onChange={e => setEquipo({ ...equipo, codPais: e.target.value })} />
+            onChange={e => setEquipo({ ...equipo, codPais: e.target.value })}>
+            <option value="">Seleccionar país</option>
+            {paises.map(p => (
+              <option key={p.codigo} value={p.codigo}>{p.nombre}</option>
+            ))}
+          </select>
           <button className="admin-actionButton" onClick={addEquipo}>Crear</button>
           <div className="admin-list">
             {equipos.map(e => (
@@ -95,9 +103,14 @@ export default function AdminConfiguracion() {
           <input className="admin-input" placeholder="Nombre"
             value={estadio.nombre}
             onChange={e => setEstadio({ ...estadio, nombre: e.target.value })} />
-          <input className="admin-input" placeholder="Código país"
+          <select className="admin-input"
             value={estadio.codPais}
-            onChange={e => setEstadio({ ...estadio, codPais: e.target.value })} />
+            onChange={e => setEstadio({ ...estadio, codPais: e.target.value })}>
+            <option value="">Seleccionar país</option>
+            {paises.map(p => (
+              <option key={p.codigo} value={p.codigo}>{p.nombre}</option>
+            ))}
+          </select>
           <button className="admin-actionButton" onClick={addEstadio}>Crear</button>
           <div className="admin-list">
             {estadios.map(e => (

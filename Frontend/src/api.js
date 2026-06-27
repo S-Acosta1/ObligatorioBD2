@@ -122,6 +122,12 @@ export async function deshabilitarSector(idEvento, idSector) {
   });
 }
 
+// ── Equipos (public reads, auth writes) ──
+
+export async function fetchEquipos() {
+  return request("/equipos");
+}
+
 // ── Estadios (public reads, auth writes) ──
 
 export async function fetchEstadios() {
