@@ -81,5 +81,6 @@ app.MapUsuarioEndpoints();
 app.MapEscanerEndpoints();
 app.MapAdminReportEndpoints();
 app.MapCompraEndpoints();
+app.MapTransferenciaEndpoints();
 
 app.Run();

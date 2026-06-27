@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { fetchEvento, fetchEventSectors, createPurchase } from "../api";
 import "./purchase.css";
 
-export default function Purchase({ currentUser, onBackToHome, onNotify, refreshTickets }) {
+export default function Purchase({ currentUser, onBackToHome, onNotify }) {
   const { eventId } = useParams();
   const [match, setMatch] = useState(null);
   const [quantity, setQuantity] = useState(1);
@@ -105,10 +105,6 @@ export default function Purchase({ currentUser, onBackToHome, onNotify, refreshT
 
       if (typeof onNotify === "function") {
         onNotify("Compra realizada con éxito.", "success");
-      }
-
-      if (typeof refreshTickets === "function") {
-        refreshTickets();
       }
 
       onBackToHome();

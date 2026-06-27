@@ -229,6 +229,19 @@
 	gap: 0.9rem;
 }
 
+.ticket-card--not-held {
+	background: linear-gradient(180deg, #fffaf0 0%, #fff 100%);
+	border-color: #f0dbb8;
+}
+
+.ticket-card--not-held::before {
+	background: linear-gradient(90deg, #e88300 0 33%, #fff 33% 66%, #c9182b 66% 100%);
+}
+
+.ticket-card__badge--transferred {
+	color: #b36200;
+}
+
 .ticket-card__top {
 	display: flex;
 	justify-content: space-between;

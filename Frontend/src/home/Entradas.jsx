@@ -64,7 +64,7 @@ export default function Entradas({ initialView = "held" }) {
         purchasedTickets.length > 0 ? (
           <div className="home-ticketGrid">
             {purchasedTickets.map((ticket) => (
-              <TicketCard key={ticket.id} ticket={ticket} onTransferTicket={onTransferTicket} onNotify={onNotify} />
+              <TicketCard key={ticket.id} ticket={ticket} currentUser={currentUser} onTransferTicket={onTransferTicket} onNotify={onNotify} />
             ))}
           </div>
         ) : (

@@ -132,6 +132,98 @@ export async function fetchEntradas(email) {
   return response.json();
 }
 
+export async function fetchEntradasCompradas(email) {
+  const token = getToken();
+  const response = await fetch(`${API_URL}/api/usuarios/${encodeURIComponent(email)}/compras`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("No se pudieron obtener las compras.");
+  }
+
+  return response.json();
+}
+
+export async function fetchUserByEmail(email) {
+  const token = getToken();
+  const response = await fetch(`${API_URL}/api/usuarios/buscar/${encodeURIComponent(email)}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Usuario no encontrado");
+  }
+
+  return response.json();
+}
+
+export async function createTransferencia(idEntrada, emailRecibe) {
+  const token = getToken();
+  const response = await fetch(`${API_URL}/api/transferencias`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ IdEntrada: idEntrada, EmailRecibe: emailRecibe }),
+  });
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(body.mensaje || "Error al crear la transferencia.");
+  }
+
+  return response.json();
+}
+
+export async function fetchPendientesRecibidas() {
+  const token = getToken();
+  const response = await fetch(`${API_URL}/api/transferencias/pendientes-recibidas`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (!response.ok) {
+    throw new Error("No se pudieron obtener las transferencias pendientes.");
+  }
+
+  return response.json();
+}
+
+export async function acceptTransferencia(id) {
+  const token = getToken();
+  const response = await fetch(`${API_URL}/api/transferencias/${id}/aceptar`, {
+    method: "PUT",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(body.mensaje || "Error al aceptar la transferencia.");
+  }
+
+  return response.json();
+}
+
+export async function rejectTransferencia(id) {
+  const token = getToken();
+  const response = await fetch(`${API_URL}/api/transferencias/${id}/rechazar`, {
+    method: "PUT",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(body.mensaje || "Error al rechazar la transferencia.");
+  }
+
+  return response.json();
+}
+
 export async function fetchProfile(email) {
   const token = getToken();
   const response = await fetch(`${API_URL}/api/usuarios/${encodeURIComponent(email)}`, {

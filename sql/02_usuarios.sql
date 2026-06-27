@@ -27,7 +27,7 @@ GRANT SELECT, UPDATE ON ticketing2026.EventoHabilitaSector TO 'db_usuario'@'%';
 GRANT SELECT ON ticketing2026.Comision TO 'db_usuario'@'%';
 GRANT SELECT, INSERT ON ticketing2026.Compra TO 'db_usuario'@'%';
 GRANT SELECT, INSERT ON ticketing2026.CompraAplicaComision TO 'db_usuario'@'%';
-GRANT SELECT, INSERT ON ticketing2026.Entrada TO 'db_usuario'@'%';
+GRANT SELECT, UPDATE, INSERT ON ticketing2026.Entrada TO 'db_usuario'@'%';
 GRANT SELECT, INSERT, UPDATE ON ticketing2026.Transferencia TO 'db_usuario'@'%';
 GRANT SELECT, INSERT ON ticketing2026.TransferenciaContieneEntrada TO 'db_usuario'@'%';
 

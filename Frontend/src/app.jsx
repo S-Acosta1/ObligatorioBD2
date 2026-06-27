@@ -1,5 +1,5 @@
 import "./app.css";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { getToken, getUser, setSession, clearSession, isTokenExpired, getRoleFromUser } from "./token.js";
 import AuthLayout from "./auth/auth.jsx";
@@ -15,14 +15,7 @@ import AdminReportes from "./Admin/AdminReportes";
 import Dashboard from "./dashboard/dashboard.jsx";
 import Purchase from "./purchase/purchase.jsx";
 import Profile from "./profile/profile.jsx";
-import { login, fetchEntradas } from "./api.js";
-
-const seedUsers = [
-  { email: "usuario@email.com", password: "123456", name: "Usuario General", role: "user" },
-  { email: "receptor@email.com", password: "123456", name: "Usuario Receptor", role: "user" },
-  { email: "funcionario@email.com", password: "123456", name: "Funcionario Mundial", role: "worker" },
-  { email: "admin@email.com", password: "123456", name: "Administrador Mundial", role: "admin" },
-];
+import { login } from "./api.js";
 
 function ProtectedRoute({ children, requiredRole }) {
   const token = getToken();
@@ -60,7 +53,6 @@ export default function App() {
   const [currentRole, setCurrentRole] = useState("user");
   const [currentUser, setCurrentUser] = useState(null);
   const [adminSection, setAdminSection] = useState("home");
-  const [ownedTickets, setOwnedTickets] = useState([]);
   const [loginError, setLoginError] = useState(null);
   const [notification, setNotification] = useState(null);
   const notificationTimerRef = useRef(null);
@@ -78,47 +70,6 @@ export default function App() {
     clearSession();
   }, []);
 
-  const fetchUserTickets = useCallback(async (email) => {
-    try {
-      const data = await fetchEntradas(email);
-      const mapped = data.map((t) => {
-        const [date, timeFull] = t.fechaHora.split("T");
-        const time = timeFull?.slice(0, 5) || "";
-        return {
-          id: t.id,
-          selection: t.equipoLocal,
-          rival: t.equipoVisitante,
-          competition: "",
-          stadium: t.nombreEstadio,
-          city: t.ubicacion,
-          date,
-          time,
-          price: t.precio,
-          totalPrice: t.montoTotal,
-          sectorName: t.sectorNombre,
-          purchasedByEmail: t.purchasedByEmail,
-          purchasedByName: t.buyerNombre,
-          currentHolderEmail: t.currentHolderEmail,
-          currentHolder: t.holderNombre,
-          documentType: t.holderDocTipo,
-          documentNumber: t.holderDocNumero,
-          estado: t.estado,
-          pendingTransfer: null,
-          transferHistory: [],
-        };
-      });
-      setOwnedTickets(mapped);
-    } catch {
-      setOwnedTickets([]);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (currentUser?.email) {
-      fetchUserTickets(currentUser.email);
-    }
-  }, [currentUser, fetchUserTickets]);
-
   useEffect(() => {
     if (!currentUser) return;
 
@@ -134,8 +85,6 @@ export default function App() {
 
     return () => clearInterval(interval);
   }, [currentUser, navigate]);
-
-  const users = useMemo(() => [...seedUsers], []);
 
   const showNotification = (message, type = "success") => {
     if (notificationTimerRef.current) {
@@ -172,119 +121,12 @@ export default function App() {
 
   const handleClearLoginError = () => setLoginError(null);
 
-  const refreshTickets = useCallback(() => {
-    if (currentUser?.email) {
-      fetchUserTickets(currentUser.email);
-    }
-  }, [currentUser, fetchUserTickets]);
-
-  const handleTransferTicket = (ticketId, recipient) => {
-    const normalizedRecipient = recipient.trim().toLowerCase();
-    const recipientUser = users.find((user) => user.email === normalizedRecipient);
-
-    if (!recipientUser) {
-      showNotification("El usuario receptor no existe o no está registrado.", "error");
-      return;
-    }
-
-    if (recipientUser.email === currentUser?.email) {
-      showNotification("No podés transferirte una entrada a tu propia cuenta.", "error");
-      return;
-    }
-
-    setOwnedTickets((currentTickets) =>
-      currentTickets.map((ticket) =>
-        ticket.id === ticketId
-          ? {
-              ...ticket,
-              pendingTransfer: {
-                id: `${ticketId}-${Date.now()}`,
-                fromEmail: currentUser.email,
-                fromName: currentUser.name,
-                toEmail: recipientUser.email,
-                toName: recipientUser.name,
-                requestedAt: new Date().toISOString(),
-              },
-            }
-          : ticket,
-      ),
-    );
-    showNotification("Transferencia enviada. El receptor debe aceptarla.", "success");
-  };
-
-  const handleAcceptTransfer = (ticketId) => {
-    setOwnedTickets((currentTickets) =>
-      currentTickets.map((ticket) => {
-        if (ticket.id !== ticketId || ticket.pendingTransfer?.toEmail !== currentUser?.email) {
-          return ticket;
-        }
-
-        const acceptedTransfer = {
-          ...ticket.pendingTransfer,
-          acceptedAt: new Date().toISOString(),
-        };
-
-        return {
-          ...ticket,
-          currentHolderEmail: currentUser.email,
-          currentHolder: currentUser.name,
-          pendingTransfer: null,
-          transferHistory: [...(ticket.transferHistory || []), acceptedTransfer],
-        };
-      }),
-    );
-    showNotification("Transferencia aceptada. La entrada ahora está en tu poder.", "success");
-  };
-
-  const handleRejectTransfer = (ticketId) => {
-    setOwnedTickets((currentTickets) =>
-      currentTickets.map((ticket) =>
-        ticket.id === ticketId && ticket.pendingTransfer?.toEmail === currentUser?.email
-          ? {
-              ...ticket,
-              pendingTransfer: null,
-            }
-          : ticket,
-      ),
-    );
-    showNotification("Transferencia rechazada.", "success");
-  };
-
   const handleLogout = () => {
     clearSession();
     setCurrentUser(null);
     setCurrentRole("user");
     navigate("/login");
   };
-
-  const currentUserTickets = useMemo(() => {
-    if (!currentUser) {
-      return {
-        purchasedTickets: [],
-        heldTickets: [],
-        pendingReceivedTransfers: [],
-        transferHistory: [],
-      };
-    }
-
-    const purchasedTickets = ownedTickets.filter((ticket) => ticket.purchasedByEmail === currentUser.email);
-    const heldTickets = ownedTickets.filter((ticket) => ticket.currentHolderEmail === currentUser.email);
-    const pendingReceivedTransfers = ownedTickets.filter((ticket) => ticket.pendingTransfer?.toEmail === currentUser.email);
-    const transferHistory = ownedTickets.flatMap((ticket) =>
-      (ticket.transferHistory || [])
-        .filter((transfer) => transfer.toEmail === currentUser.email || transfer.fromEmail === currentUser.email)
-        .map((transfer) => ({
-          ...transfer,
-          ticketId: ticket.id,
-          matchName: `${ticket.selection} vs ${ticket.rival}`,
-          competition: ticket.competition,
-          date: ticket.date,
-          time: ticket.time,
-        })),
-    );
-
-    return { purchasedTickets, heldTickets, pendingReceivedTransfers, transferHistory };
-  }, [currentUser, ownedTickets]);
 
   return (
     <>
@@ -322,14 +164,7 @@ export default function App() {
             <ProtectedRoute>
               <Home
                 currentUser={currentUser}
-                purchasedTickets={currentUserTickets.purchasedTickets}
-                heldTickets={currentUserTickets.heldTickets}
-                pendingReceivedTransfers={currentUserTickets.pendingReceivedTransfers}
-                transferHistory={currentUserTickets.transferHistory}
                 onBuyTicket={handleBuyTicket}
-                onTransferTicket={handleTransferTicket}
-                onAcceptTransfer={handleAcceptTransfer}
-                onRejectTransfer={handleRejectTransfer}
                 onNotify={showNotification}
                 onLogout={handleLogout}
               />
@@ -375,7 +210,6 @@ export default function App() {
               currentUser={currentUser}
               onNotify={showNotification}
               onBackToHome={() => navigate("/home")}
-              refreshTickets={refreshTickets}
             />
           </ProtectedRoute>
         } />
