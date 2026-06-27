@@ -142,9 +142,10 @@ CREATE TABLE Evento (
 );
 
 CREATE TABLE EventoHabilitaSector (
-    id_evento       INTEGER NOT NULL,
-    id_sector        INTEGER NOT NULL,
-    nombre_estadio  VARCHAR(100) NOT NULL,
+    id_evento            INTEGER NOT NULL,
+    id_sector            INTEGER NOT NULL,
+    nombre_estadio       VARCHAR(100) NOT NULL,
+    asientos_disponibles INTEGER NOT NULL DEFAULT 0,
 	PRIMARY KEY (id_evento, id_sector, nombre_estadio),
 
     CONSTRAINT fk_habilita_evento
@@ -153,7 +154,10 @@ CREATE TABLE EventoHabilitaSector (
 
     CONSTRAINT fk_habilita_sector
 	FOREIGN KEY (id_sector, nombre_estadio)
-	REFERENCES Sector(id_sector, nombre_estadio)
+	REFERENCES Sector(id_sector, nombre_estadio),
+
+    CONSTRAINT ck_ehs_asientos
+    CHECK (asientos_disponibles >= 0)
 );
 
 CREATE TABLE FuncionarioAsignadoEventoSector (
@@ -319,3 +323,72 @@ CREATE TABLE Verificacion (
 
     CONSTRAINT ck_verificacion_estado  CHECK (estado IN ('VALIDO','INVALIDO','CONSUMIDO'))
 );
+
+DELIMITER $$
+
+CREATE TRIGGER trg_ehs_cap_maxima
+BEFORE INSERT ON EventoHabilitaSector
+FOR EACH ROW
+BEGIN
+    DECLARE cap INT;
+    DECLARE msg VARCHAR(200);
+    SELECT capacidad_maxima INTO cap
+    FROM Sector
+    WHERE id_sector = NEW.id_sector AND nombre_estadio = NEW.nombre_estadio;
+    IF cap IS NULL THEN
+        SET msg = CONCAT('Sector ', NEW.id_sector, ' not found in stadium ', NEW.nombre_estadio);
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = msg;
+    END IF;
+    SET NEW.asientos_disponibles = cap;
+END$$
+
+CREATE TRIGGER trg_ehs_before_update
+BEFORE UPDATE ON EventoHabilitaSector
+FOR EACH ROW
+BEGIN
+    DECLARE cap INT;
+    SELECT capacidad_maxima INTO cap
+    FROM Sector
+    WHERE id_sector = NEW.id_sector AND nombre_estadio = NEW.nombre_estadio;
+    IF NEW.asientos_disponibles > cap THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'asientos_disponibles cannot exceed sector capacity';
+    END IF;
+END$$
+
+CREATE TRIGGER trg_sector_before_update_cap
+BEFORE UPDATE ON Sector
+FOR EACH ROW
+BEGIN
+    DECLARE diff INT;
+    SET diff = OLD.capacidad_maxima - NEW.capacidad_maxima;
+    IF diff > 0 THEN
+        IF EXISTS (
+            SELECT 1
+            FROM EventoHabilitaSector
+            WHERE id_sector = NEW.id_sector
+              AND nombre_estadio = NEW.nombre_estadio
+              AND asientos_disponibles - diff < 0
+        ) THEN
+            SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Cannot reduce capacity: tickets already sold exceed new capacity';
+        END IF;
+    END IF;
+END$$
+
+CREATE TRIGGER trg_sector_after_update_cap
+AFTER UPDATE ON Sector
+FOR EACH ROW
+BEGIN
+    DECLARE diff INT;
+    SET diff = OLD.capacidad_maxima - NEW.capacidad_maxima;
+    IF diff != 0 THEN
+        UPDATE EventoHabilitaSector
+        SET asientos_disponibles = asientos_disponibles - diff
+        WHERE id_sector = NEW.id_sector
+          AND nombre_estadio = NEW.nombre_estadio;
+    END IF;
+END$$
+
+DELIMITER ;
