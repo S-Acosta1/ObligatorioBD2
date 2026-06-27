@@ -179,7 +179,7 @@ export default function App() {
           path="/admin"
           element={
             <ProtectedRoute requiredRole="admin">
-              <AdminLayout currentUser={currentUser} onLogout={handleLogout} />
+              <AdminLayout currentUser={currentUser} onLogout={handleLogout} onNotify={showNotification} />
             </ProtectedRoute>
           }
         >
