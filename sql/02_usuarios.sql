@@ -13,6 +13,7 @@ GRANT SELECT ON ticketing2026.Funcionario TO 'db_auth'@'%';
 GRANT SELECT, INSERT ON ticketing2026.UsuarioGeneral TO 'db_auth'@'%';
 
 GRANT SELECT ON ticketing2026.Pais TO 'db_usuario'@'%';
+GRANT SELECT ON ticketing2026.TipoDocumento TO 'db_usuario'@'%';
 GRANT SELECT, INSERT ON ticketing2026.Documento TO 'db_usuario'@'%';
 GRANT SELECT, INSERT ON ticketing2026.Direccion TO 'db_usuario'@'%';
 GRANT SELECT, INSERT, UPDATE ON ticketing2026.Usuario TO 'db_usuario'@'%';
@@ -31,6 +32,7 @@ GRANT SELECT, INSERT, UPDATE ON ticketing2026.Transferencia TO 'db_usuario'@'%';
 GRANT SELECT, INSERT ON ticketing2026.TransferenciaContieneEntrada TO 'db_usuario'@'%';
 
 GRANT SELECT ON ticketing2026.Pais TO 'db_usuario_lectura'@'%';
+GRANT SELECT ON ticketing2026.TipoDocumento TO 'db_usuario_lectura'@'%';
 GRANT SELECT ON ticketing2026.Documento TO 'db_usuario_lectura'@'%';
 GRANT SELECT ON ticketing2026.Direccion TO 'db_usuario_lectura'@'%';
 GRANT SELECT ON ticketing2026.Usuario TO 'db_usuario_lectura'@'%';
@@ -49,6 +51,7 @@ GRANT SELECT ON ticketing2026.Transferencia TO 'db_usuario_lectura'@'%';
 GRANT SELECT ON ticketing2026.TransferenciaContieneEntrada TO 'db_usuario_lectura'@'%';
 
 GRANT SELECT ON ticketing2026.Pais TO 'db_funcionario'@'%';
+GRANT SELECT ON ticketing2026.TipoDocumento TO 'db_funcionario'@'%';
 GRANT SELECT ON ticketing2026.Documento TO 'db_funcionario'@'%';
 GRANT SELECT ON ticketing2026.Direccion TO 'db_funcionario'@'%';
 GRANT SELECT ON ticketing2026.Usuario TO 'db_funcionario'@'%';
@@ -70,6 +73,7 @@ GRANT SELECT ON ticketing2026.Escaner TO 'db_funcionario'@'%';
 GRANT SELECT ON ticketing2026.FuncionarioEscaner TO 'db_funcionario'@'%';
 
 GRANT SELECT, INSERT, UPDATE, DELETE ON ticketing2026.Pais TO 'db_administrador'@'%';
+GRANT SELECT, INSERT, UPDATE, DELETE ON ticketing2026.TipoDocumento TO 'db_administrador'@'%';
 GRANT SELECT, INSERT, UPDATE, DELETE ON ticketing2026.Documento TO 'db_administrador'@'%';
 GRANT SELECT, INSERT, UPDATE, DELETE ON ticketing2026.Direccion TO 'db_administrador'@'%';
 GRANT SELECT, INSERT, UPDATE, DELETE ON ticketing2026.Usuario TO 'db_administrador'@'%';
@@ -95,6 +99,7 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON ticketing2026.TokenQR TO 'db_administrad
 GRANT SELECT, INSERT, UPDATE, DELETE ON ticketing2026.Verificacion TO 'db_administrador'@'%';
 
 GRANT SELECT ON ticketing2026.Pais TO 'db_administrador_lectura'@'%';
+GRANT SELECT ON ticketing2026.TipoDocumento TO 'db_administrador_lectura'@'%';
 GRANT SELECT ON ticketing2026.Documento TO 'db_administrador_lectura'@'%';
 GRANT SELECT ON ticketing2026.Direccion TO 'db_administrador_lectura'@'%';
 GRANT SELECT ON ticketing2026.Usuario TO 'db_administrador_lectura'@'%';

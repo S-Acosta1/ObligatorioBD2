@@ -1,7 +1,7 @@
 import { useState } from "react";
 import "./login.css";
 
-export default function Login({ error, onShowRegister, onShowRecover, onLoginSuccess, onClearError }) {
+export default function Login({ error, onShowRegister, onLoginSuccess, onClearError }) {
   const [correo, setCorreo] = useState("");
   const [password, setPassword] = useState("");
 
@@ -60,9 +60,6 @@ export default function Login({ error, onShowRegister, onShowRecover, onLoginSuc
         <div className="login-linksRow">
           <button type="button" className="login-link-button" onClick={onShowRegister}>
             Crear usuario
-          </button>
-          <button type="button" className="login-link-button" onClick={onShowRecover}>
-            Olvidé mi contraseña
           </button>
         </div>
       </div>

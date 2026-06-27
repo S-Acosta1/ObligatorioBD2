@@ -1,14 +1,20 @@
 CREATE TABLE Pais (
     codigo VARCHAR(3)  NOT NULL UNIQUE PRIMARY KEY,
-    nombre VARCHAR(80) NOT NULL
+    nombre VARCHAR(80) NOT NULL UNIQUE
+);
+
+CREATE TABLE TipoDocumento (
+    id_tipo  INTEGER AUTO_INCREMENT PRIMARY KEY,
+	nombre VARCHAR(30) NOT NULL UNIQUE
 );
 
 CREATE TABLE Documento (
-	tipo          VARCHAR(20) NOT NULL,
+	tipo          INTEGER NOT NULL,
 	numero        VARCHAR(30) NOT NULL,
     cod_pais      VARCHAR(3)  NOT NULL,
 	PRIMARY KEY (tipo, numero, cod_pais),
-    CONSTRAINT fk_doc_pais    FOREIGN KEY (cod_pais)    REFERENCES Pais(codigo)
+    CONSTRAINT fk_doc_pais    FOREIGN KEY (cod_pais)    REFERENCES Pais(codigo),
+	CONSTRAINT fk_doc_tipo FOREIGN KEY (tipo) REFERENCES TipoDocumento(id_tipo)
 );
 
 CREATE TABLE Direccion (
@@ -25,7 +31,7 @@ CREATE TABLE Usuario (
     email              VARCHAR(120) NOT NULL PRIMARY KEY,
     nombre             VARCHAR(120) NOT NULL,
     hash_contra        VARCHAR(255) NOT NULL,
-	tipo_documento     VARCHAR(20)  NOT NULL,
+	tipo_documento     INTEGER      NOT NULL,
 	numero_documento   VARCHAR(30)  NOT NULL,
     cod_pais_documento VARCHAR(3)   NOT NULL,
     id_direccion       INTEGER      NOT NULL,

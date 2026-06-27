@@ -75,6 +75,7 @@ app.MapEquipoEndpoints();
 app.MapEstadioEndpoints();
 app.MapEventoEndpoints();
 app.MapPaisEndpoints();
+app.MapTipoDocumentoEndpoints();
 app.MapSectorEndpoints();
 app.MapUsuarioEndpoints();
 app.MapEscanerEndpoints();

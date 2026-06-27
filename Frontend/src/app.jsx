@@ -5,7 +5,6 @@ import { Routes,Route,Navigate,useNavigate } from "react-router-dom";
 import AuthLayout from "./auth/auth.jsx";
 import Login from "./login/login.jsx";
 import Register from "./register/register.jsx";
-import Recover from "./recover/recover.jsx";
 import Home from "./home/home.jsx";
 import Dashboard from "./dashboard/dashboard.jsx";
 import Purchase from "./purchase/purchase.jsx";
