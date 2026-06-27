@@ -8,7 +8,8 @@ import Register from "./register/register.jsx";
 import Home from "./home/home.jsx";
 import Partidos from "./home/Partidos";
 import Entradas from "./home/Entradas";
-import HomeA from "./home/homeA.jsx";
+import AdminLayout from "./Admin/AdminLayout";
+import AdminDashboard from "./Admin/AdminDashboard";
 import AdminEventos from "./Admin/AdminEventos";
 import AdminConfiguracion from "./Admin/AdminConfiguracion";
 import AdminReportes from "./Admin/AdminReportes";
@@ -52,7 +53,7 @@ export default function App() {
   const navigate = useNavigate();
   const [currentRole, setCurrentRole] = useState("user");
   const [currentUser, setCurrentUser] = useState(null);
-  const [adminSection, setAdminSection] = useState("home");
+
   const [loginError, setLoginError] = useState(null);
   const [notification, setNotification] = useState(null);
   const notificationTimerRef = useRef(null);
@@ -178,24 +179,15 @@ export default function App() {
           path="/admin"
           element={
             <ProtectedRoute requiredRole="admin">
-              {adminSection === "home" && (
-                <HomeA
-                  currentUser={currentUser}
-                  stats={{ users: 0, matches: 0, tickets: 0, sales: 0 }}
-                  onUsers={() => setAdminSection("config")}
-                  onMatches={() => setAdminSection("eventos")}
-                  onTickets={() => setAdminSection("eventos")}
-                  onReports={() => setAdminSection("reportes")}
-                  onConfiguration={() => setAdminSection("config")}
-                  onLogout={handleLogout}
-                />
-              )}
-              {adminSection === "eventos" && <AdminEventos onBack={() => setAdminSection("home")} />}
-              {adminSection === "config" && <AdminConfiguracion onBack={() => setAdminSection("home")} />}
-              {adminSection === "reportes" && <AdminReportes onBack={() => setAdminSection("home")} />}
+              <AdminLayout currentUser={currentUser} onLogout={handleLogout} />
             </ProtectedRoute>
           }
-        />
+        >
+          <Route index element={<AdminDashboard />} />
+          <Route path="eventos" element={<AdminEventos />} />
+          <Route path="config" element={<AdminConfiguracion />} />
+          <Route path="reportes" element={<AdminReportes />} />
+        </Route>
         <Route
           path="/worker"
           element={

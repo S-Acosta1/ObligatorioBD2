@@ -28,14 +28,14 @@
 	align-items: center;
 	gap: 0.5rem;
 	border: 1px solid rgba(255, 255, 255, 0.22);
-	background: rgba(255, 255, 255, 0.18);
+	background: rgba(255, 255, 255, 0.25);
 	color: #fff;
 	border-radius: 999px;
 	padding: 0.5rem 0.9rem 0.5rem 0.5rem;
 	font-weight: 700;
 	cursor: pointer;
 	backdrop-filter: blur(10px);
-	box-shadow: 0 12px 26px rgba(0, 0, 0, 0.14);
+	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
 	transition: transform 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
 }
 
@@ -62,14 +62,14 @@
 
 .home-logout {
 	border: 1px solid rgba(255, 255, 255, 0.22);
-	background: rgba(255, 255, 255, 0.18);
+	background: rgba(255, 255, 255, 0.25);
 	color: #fff;
 	border-radius: 999px;
 	padding: 0.9rem 1.2rem;
 	font-weight: 700;
 	cursor: pointer;
 	backdrop-filter: blur(10px);
-	box-shadow: 0 12px 26px rgba(0, 0, 0, 0.14);
+	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
 }
 
 .home-actions {
@@ -81,14 +81,14 @@
 
 .home-actionButton {
 	border: 1px solid rgba(255, 255, 255, 0.24);
-	background: rgba(255, 255, 255, 0.16);
+	background: rgba(255, 255, 255, 0.25);
 	color: #fff;
 	border-radius: 999px;
 	padding: 0.9rem 1.15rem;
 	font-weight: 800;
 	cursor: pointer;
 	backdrop-filter: blur(10px);
-	box-shadow: 0 12px 26px rgba(0, 0, 0, 0.12);
+	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
 }
 
 .home-actionButton--primary {
@@ -110,9 +110,10 @@
 	opacity: 0.95;
 	padding: 1rem;
 	border-radius: 22px;
-	background: rgba(255, 255, 255, 0.18);
-	border: 1px solid rgba(255, 255, 255, 0.24);
+	background: rgba(255, 255, 255, 0.25);
+	border: 1px solid rgba(255, 255, 255, 0.3);
 	backdrop-filter: blur(12px);
+	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
 .home-search,
@@ -581,7 +582,7 @@
 .home-filterField,
 .home-actionButton,
 .home-logout {
-	box-shadow: 0 18px 45px rgba(51, 18, 24, 0.16);
+	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
 }
 
 .home-sectionKicker {
@@ -592,7 +593,7 @@
 .home-logout,
 .home-filterField {
 	border-radius: 16px;
-	background: rgba(255, 255, 255, 0.18);
+	background: rgba(255, 255, 255, 0.25);
 }
 
 .home-actionButton,
@@ -674,11 +675,12 @@
 	gap: 0.5rem;
 	flex: 1;
 	min-width: 0;
-	background: rgba(255, 255, 255, 0.12);
+	background: rgba(255, 255, 255, 0.22);
 	border-radius: 20px;
 	padding: 0.4rem;
-	border: 1px solid rgba(255, 255, 255, 0.18);
+	border: 1px solid rgba(255, 255, 255, 0.25);
 	backdrop-filter: blur(10px);
+	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
 .home-tab {
@@ -691,7 +693,8 @@
 	font-size: 0.95rem;
 	cursor: pointer;
 	background: transparent;
-	color: rgba(255, 255, 255, 0.8);
+	color: #fff;
+	text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
 	transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
 	display: inline-flex;
 	align-items: center;
@@ -700,14 +703,15 @@
 }
 
 .home-tab:hover {
-	background: rgba(255, 255, 255, 0.1);
+	background: rgba(255, 255, 255, 0.15);
 	color: #fff;
 }
 
 .home-tab.is-active {
 	background: rgba(255, 255, 255, 0.92);
 	color: #13202d;
-	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+	text-shadow: none;
 }
 
 .home-tabCount {
@@ -718,7 +722,7 @@
 	height: 1.4rem;
 	padding: 0 0.35rem;
 	border-radius: 999px;
-	background: rgba(255, 255, 255, 0.2);
+	background: rgba(255, 255, 255, 0.25);
 	font-size: 0.72rem;
 	font-weight: 900;
 	line-height: 1;
@@ -754,6 +758,7 @@
 	cursor: pointer;
 	transition: transform 0.18s ease, background 0.18s ease;
 	white-space: nowrap;
+	box-shadow: 0 4px 20px rgba(217, 37, 42, 0.5);
 }
 
 .home-pendingBadge:hover {
