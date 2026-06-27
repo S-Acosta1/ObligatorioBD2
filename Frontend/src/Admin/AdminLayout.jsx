@@ -3,7 +3,7 @@ import { Outlet } from "react-router-dom";
 import AdminTabBar from "./AdminTabBar";
 import "./Admin.css";
 
-export default function AdminLayout({ currentUser, onLogout }) {
+export default function AdminLayout({ currentUser, onLogout, onNotify }) {
   const navigate = useNavigate();
 
   return (
@@ -22,7 +22,7 @@ export default function AdminLayout({ currentUser, onLogout }) {
         </div>
       </header>
 
-      <Outlet context={{ currentUser, onLogout }} />
+      <Outlet context={{ currentUser, onLogout, onNotify }} />
     </main>
   );
 }

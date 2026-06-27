@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
+import { useOutletContext } from "react-router-dom";
 import { getEventos, crearEvento, habilitarSector, fetchPaises, getEquipos, getEstadios } from "../api";
 
 export default function AdminEventos() {
+  const { onNotify } = useOutletContext();
   const [events, setEvents] = useState([]);
   const [paises, setPaises] = useState([]);
   const [equipos, setEquipos] = useState([]);
@@ -25,29 +27,62 @@ export default function AdminEventos() {
   }, []);
 
   async function load() {
-    const data = await getEventos();
-    setEvents(data);
+    try {
+      const data = await getEventos();
+      setEvents(data);
+    } catch (error) {
+      onNotify?.(error.message, "error");
+    }
   }
 
   async function create() {
-    await crearEvento(form);
-    load();
+    if (!form.fechaHora || !form.ubicacion || !form.nombreEstadio || !form.equipoLocal || !form.paisEquipoLocal || !form.equipoVisitante || !form.paisEquipoVisitante) {
+      onNotify?.("Completá todos los campos del evento.", "error");
+      return;
+    }
+    try {
+      await crearEvento(form);
+      onNotify?.("Evento creado con éxito.", "success");
+      setForm({
+        fechaHora: "",
+        ubicacion: "",
+        nombreEstadio: "",
+        equipoLocal: "",
+        paisEquipoLocal: "",
+        equipoVisitante: "",
+        paisEquipoVisitante: ""
+      });
+      load();
+    } catch (error) {
+      onNotify?.(error.message, "error");
+    }
   }
 
   async function sector(id) {
-    await habilitarSector({
-      idEvento: id,
-      idSector: 1,
-      nombreEstadio: form.nombreEstadio
-    });
+    if (!form.nombreEstadio) {
+      onNotify?.("Seleccioná un estadio primero.", "error");
+      return;
+    }
+    try {
+      await habilitarSector({
+        idEvento: id,
+        idSector: 1,
+        nombreEstadio: form.nombreEstadio
+      });
+      onNotify?.("Sector habilitado con éxito.", "success");
+    } catch (error) {
+      onNotify?.(error.message, "error");
+    }
   }
 
   return (
     <section className="admin-page-section">
       <h1>Administrar eventos</h1>
       <input className="admin-input" placeholder="Fecha y hora"
+        value={form.fechaHora}
         onChange={e => setForm({ ...form, fechaHora: e.target.value })} />
       <input className="admin-input" placeholder="Ubicación"
+        value={form.ubicacion}
         onChange={e => setForm({ ...form, ubicacion: e.target.value })} />
       <select className="admin-input"
         value={form.nombreEstadio}

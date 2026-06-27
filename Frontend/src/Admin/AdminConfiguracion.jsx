@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useOutletContext } from "react-router-dom";
 import {
   getEquipos,
   crearEquipo,
@@ -15,6 +16,7 @@ import {
 } from "../api";
 
 export default function AdminConfiguracion() {
+  const { onNotify } = useOutletContext();
   const [equipos, setEquipos] = useState([]);
   const [estadios, setEstadios] = useState([]);
   const [sectores, setSectores] = useState([]);
@@ -33,39 +35,110 @@ export default function AdminConfiguracion() {
       setEscaners(await getEscaners());
       setPaises(await fetchPaises());
     } catch (error) {
-      console.error(error);
+      onNotify?.(error.message, "error");
     }
   }
 
   useEffect(() => { loadData(); }, []);
 
   async function addEquipo() {
-    await crearEquipo(equipo);
-    setEquipo({ nombre: "", codPais: "" });
-    loadData();
+    if (!equipo.nombre.trim() || !equipo.codPais) {
+      onNotify?.("Completá todos los campos del equipo.", "error");
+      return;
+    }
+    try {
+      await crearEquipo(equipo);
+      onNotify?.("Equipo creado con éxito.", "success");
+      setEquipo({ nombre: "", codPais: "" });
+      loadData();
+    } catch (error) {
+      onNotify?.(error.message, "error");
+    }
   }
 
   async function addEstadio() {
-    await crearEstadio(estadio);
-    setEstadio({ nombre: "", codPais: "" });
-    loadData();
+    if (!estadio.nombre.trim() || !estadio.codPais) {
+      onNotify?.("Completá todos los campos del estadio.", "error");
+      return;
+    }
+    try {
+      await crearEstadio(estadio);
+      onNotify?.("Estadio creado con éxito.", "success");
+      setEstadio({ nombre: "", codPais: "" });
+      loadData();
+    } catch (error) {
+      onNotify?.(error.message, "error");
+    }
   }
 
   async function cargarSectores(nombre) {
+    if (!nombre) return;
     setEstadioSector(nombre);
-    setSectores(await getSectores(nombre));
+    try {
+      setSectores(await getSectores(nombre));
+    } catch (error) {
+      onNotify?.(error.message, "error");
+    }
   }
 
   async function addSector() {
-    await crearSector(estadioSector, sector);
-    setSector({ nombre: "", capacidadMaxima: "" });
-    cargarSectores(estadioSector);
+    if (!estadioSector || !sector.nombre.trim() || !sector.capacidadMaxima.trim()) {
+      onNotify?.("Completá todos los campos del sector.", "error");
+      return;
+    }
+    try {
+      await crearSector(estadioSector, sector);
+      onNotify?.("Sector creado con éxito.", "success");
+      setSector({ nombre: "", capacidadMaxima: "" });
+      cargarSectores(estadioSector);
+    } catch (error) {
+      onNotify?.(error.message, "error");
+    }
   }
 
   async function addEscaner() {
-    await crearEscaner({ id: Number(escaner.id), nombreEstadio: escaner.nombreEstadio });
-    setEscaner({ id: "", nombreEstadio: "" });
-    loadData();
+    if (!escaner.id.toString().trim() || !escaner.nombreEstadio.trim()) {
+      onNotify?.("Completá todos los campos del escáner.", "error");
+      return;
+    }
+    try {
+      await crearEscaner({ id: Number(escaner.id), nombreEstadio: escaner.nombreEstadio });
+      onNotify?.("Escáner creado con éxito.", "success");
+      setEscaner({ id: "", nombreEstadio: "" });
+      loadData();
+    } catch (error) {
+      onNotify?.(error.message, "error");
+    }
+  }
+
+  async function handleEliminarEquipo(nombre, codPais) {
+    try {
+      await eliminarEquipo(nombre, codPais);
+      onNotify?.("Equipo eliminado con éxito.", "success");
+      loadData();
+    } catch (error) {
+      onNotify?.(error.message, "error");
+    }
+  }
+
+  async function handleEliminarEstadio(nombre) {
+    try {
+      await eliminarEstadio(nombre);
+      onNotify?.("Estadio eliminado con éxito.", "success");
+      loadData();
+    } catch (error) {
+      onNotify?.(error.message, "error");
+    }
+  }
+
+  async function handleEliminarEscaner(id, nombreEstadio) {
+    try {
+      await eliminarEscaner(id, nombreEstadio);
+      onNotify?.("Escáner eliminado con éxito.", "success");
+      loadData();
+    } catch (error) {
+      onNotify?.(error.message, "error");
+    }
   }
 
   return (
@@ -92,7 +165,7 @@ export default function AdminConfiguracion() {
             {equipos.map(e => (
               <div className="admin-list-item" key={e.nombre}>
                 <span>{e.nombre} ({e.codPais})</span>
-                <button onClick={() => eliminarEquipo(e.nombre, e.codPais)}>X</button>
+                <button onClick={() => handleEliminarEquipo(e.nombre, e.codPais)}>X</button>
               </div>
             ))}
           </div>
@@ -116,7 +189,7 @@ export default function AdminConfiguracion() {
             {estadios.map(e => (
               <div className="admin-list-item" key={e.nombre}>
                 <span>{e.nombre}</span>
-                <button onClick={() => eliminarEstadio(e.nombre)}>X</button>
+                <button onClick={() => handleEliminarEstadio(e.nombre)}>X</button>
               </div>
             ))}
           </div>
@@ -160,7 +233,7 @@ export default function AdminConfiguracion() {
             {escaners.map(e => (
               <div className="admin-list-item" key={e.id}>
                 <span>{e.id} - {e.nombreEstadio}</span>
-                <button onClick={() => eliminarEscaner(e.id, e.nombreEstadio)}>X</button>
+                <button onClick={() => handleEliminarEscaner(e.id, e.nombreEstadio)}>X</button>
               </div>
             ))}
           </div>

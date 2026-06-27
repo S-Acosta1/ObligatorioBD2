@@ -19,8 +19,13 @@ async function request(url, options = {}) {
   });
 
   if (!response.ok) {
-    const error = await response.text().catch(() => "");
-    throw new Error(error || "Error en la petición");
+    const body = await response.text().catch(() => "");
+    let message = body || "Error en la petición";
+    try {
+      const parsed = JSON.parse(body);
+      if (parsed.mensaje) message = parsed.mensaje;
+    } catch {}
+    throw new Error(message);
   }
 
   return response.status === 204 ? null : response.json();

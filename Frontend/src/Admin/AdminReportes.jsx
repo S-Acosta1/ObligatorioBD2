@@ -1,14 +1,20 @@
 import { useEffect, useState } from "react";
+import { useOutletContext } from "react-router-dom";
 import { getRankingCompradores, getEventosMayorVenta } from "../api";
 
 export default function AdminReportes() {
+  const { onNotify } = useOutletContext();
   const [ranking, setRanking] = useState([]);
   const [ventas, setVentas] = useState([]);
 
   useEffect(() => {
     async function load() {
-      setRanking(await getRankingCompradores());
-      setVentas(await getEventosMayorVenta());
+      try {
+        setRanking(await getRankingCompradores());
+        setVentas(await getEventosMayorVenta());
+      } catch (error) {
+        onNotify?.(error.message, "error");
+      }
     }
     load();
   }, []);
