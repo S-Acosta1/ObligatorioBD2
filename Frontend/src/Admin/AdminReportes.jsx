@@ -1,34 +1,39 @@
-import {useEffect,useState} from "react";
-import {getRankingCompradores,getEventosMayorVenta} from "../AdminAPI";
+import { useEffect, useState } from "react";
+import { getRankingCompradores, getEventosMayorVenta } from "../AdminAPI";
 
+export default function AdminReportes() {
+  const [ranking, setRanking] = useState([]);
+  const [ventas, setVentas] = useState([]);
 
-export default function AdminReportes(){
-const [ranking,setRanking]=useState([]);
-const [ventas,setVentas]=useState([]);
+  useEffect(() => {
+    async function load() {
+      setRanking(await getRankingCompradores());
+      setVentas(await getEventosMayorVenta());
+    }
+    load();
+  }, []);
 
-useEffect(()=>{
-async function load(){
+  return (
+    <section className="admin-page-section">
+      <h1>Reportes</h1>
 
-    setRanking(await getRankingCompradores());
+      <h2>Ranking compradores</h2>
+      <div className="admin-list">
+        {ranking.map((r, i) => (
+          <div className="admin-list-item" key={i}>
+            <span>{r.nombre}: {r.totalCompras}</span>
+          </div>
+        ))}
+      </div>
 
-    setVentas(await getEventosMayorVenta());}
-load();},[]);
-return(
-<main className="dashboard-page">
-<h1>Reportes</h1>
-<section className="dashboard-card">
-<h2>Ranking compradores</h2>
-{
-
-ranking.map((r,i)=>(
-<p key={i}>{r.nombre}: {r.totalCompras}</p>
-))}
-</section>
-
-<section className="dashboard-card">
-<h2>Eventos con más ventas</h2>
-{ventas.map((e,i)=>(
-<p key={i}>{e.equipoLocal} vs {e.equipoVisitante}</p>
-))}
-</section>
-</main>)}
+      <h2>Eventos con más ventas</h2>
+      <div className="admin-list">
+        {ventas.map((e, i) => (
+          <div className="admin-list-item" key={i}>
+            <span>{e.equipoLocal} vs {e.equipoVisitante}</span>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
