@@ -4,22 +4,22 @@
 -- ------------------------------------------------------
 -- Server version	8.4.10
 
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
 /*!50503 SET NAMES utf8mb4 */;
-/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
-/*!40103 SET TIME_ZONE='+00:00' */;
-/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
-/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
-/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
-/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Dumping data for table `Direccion`
+-- Dumping data for table `Pais`
 --
 
-INSERT INTO `Direccion` VALUES (1,'URU','18 de Julio','Montevideo','11000');
+INSERT INTO `Pais` VALUES
+	('ARG','Argentina'),
+	('BRA','Brasil'),
+	('ENG','Inglaterra'),
+	('ESP','España'),
+	('FRA','Francia'),
+	('GER','Alemania'),
+	('MEX','México'),
+	('URU','Uruguay'),
+	('USA','Estados Unidos');
 
 --
 -- Dumping data for table `TipoDocumento`
@@ -30,6 +30,12 @@ INSERT INTO `TipoDocumento` VALUES
 	(3, 'DNI'),
 	(4, 'Cédula de Extranjería'),
 	(5, 'Tarjeta de Identidad');
+
+--
+-- Dumping data for table `Direccion`
+--
+
+INSERT INTO `Direccion` VALUES (1,'URU','18 de Julio','Montevideo','11000');
 
 --
 -- Dumping data for table `Documento`
@@ -67,6 +73,24 @@ INSERT INTO `Estadio` VALUES
 	('SoFi Stadium','USA');
 
 --
+-- Dumping data for table `Sector`
+--
+
+INSERT INTO `Sector` VALUES
+	(1,'Estadio Azteca','A',8000),
+	(2,'Estadio Azteca','B',12000),
+	(3,'Estadio Azteca','C',16000),
+	(4,'Estadio Azteca','D',16000),
+	(5,'Estadio BBVA','A',6000),
+	(6,'Estadio BBVA','B',8000),
+	(7,'SoFi Stadium','A',10000),
+	(8,'SoFi Stadium','E',15000),
+	(9,'SoFi Stadium','F',20000),
+	(10,'Estadio Akron','B',10000),
+	(11,'Estadio Akron','C',15000),
+	(12,'Estadio Akron','G',17000);
+
+--
 -- Dumping data for table `Evento`
 --
 
@@ -80,7 +104,7 @@ INSERT INTO `Evento` VALUES
 -- Dumping data for table `EventoHabilitaSector`
 --
 
-INSERT INTO `EventoHabilitaSector` VALUES
+INSERT INTO `EventoHabilitaSector` (`id_evento`, `id_sector`, `nombre_estadio`) VALUES
 	(1,1,'Estadio Azteca'),
 	(1,2,'Estadio Azteca'),
 	(1,3,'Estadio Azteca'),
@@ -93,27 +117,6 @@ INSERT INTO `EventoHabilitaSector` VALUES
 	(4,10,'Estadio Akron'),
 	(4,11,'Estadio Akron'),
 	(4,12,'Estadio Akron');
-
---
--- Dumping data for table `Pais`
---
-
-INSERT INTO `Pais` VALUES
-	('ARG','Argentina'),
-	('BRA','Brasil'),
-	('ENG','Inglaterra'),
-	('ESP','España'),
-	('FRA','Francia'),
-	('GER','Alemania'),
-	('MEX','México'),
-	('URU','Uruguay'),
-	('USA','Estados Unidos');
-
---
--- Dumping data for table `Sector`
---
-
-INSERT INTO `Sector` VALUES (1,'Estadio Azteca','A',8000),(2,'Estadio Azteca','B',12000),(3,'Estadio Azteca','C',16000),(4,'Estadio Azteca','D',16000),(5,'Estadio BBVA','A',6000),(6,'Estadio BBVA','B',8000),(7,'SoFi Stadium','A',10000),(8,'SoFi Stadium','E',15000),(9,'SoFi Stadium','F',20000),(10,'Estadio Akron','B',10000),(11,'Estadio Akron','C',15000),(12,'Estadio Akron','G',17000);
 
 --
 -- Dumping data for table `Usuario`
