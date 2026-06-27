@@ -237,6 +237,19 @@ export async function rejectTransferencia(id) {
   return response.json();
 }
 
+export async function fetchQrCode(ticketId) {
+  const token = getToken();
+  const response = await fetch(`${API_URL}/api/entradas/${ticketId}/qr`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (!response.ok) {
+    throw new Error("No se pudo obtener el código QR.");
+  }
+
+  return response.json();
+}
+
 export async function fetchProfile(email) {
   const token = getToken();
   const response = await fetch(`${API_URL}/api/usuarios/${encodeURIComponent(email)}`, {
