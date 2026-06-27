@@ -515,6 +515,86 @@
   }
 }
 
+.admin-modal--sectors {
+  max-width: 560px;
+}
+
+.admin-sectors-hint {
+  margin: -0.5rem 0 1rem;
+  font-size: 0.85rem;
+  color: #627187;
+}
+
+.admin-sectors-loading {
+  text-align: center;
+  padding: 2rem 0;
+  color: #627187;
+}
+
+.admin-sectors-list {
+  display: grid;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+  max-height: 50vh;
+  overflow-y: auto;
+}
+
+.admin-sector-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 14px;
+  background: #f5f8f5;
+  border: 1px solid #d8ece0;
+}
+
+.admin-sector-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex: 1;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.admin-sector-toggle input[type="checkbox"] {
+  width: 1.2rem;
+  height: 1.2rem;
+  accent-color: #0b8f4c;
+  cursor: pointer;
+}
+
+.admin-sector-name {
+  min-width: 6rem;
+}
+
+.admin-sector-capacity {
+  color: #627187;
+  font-weight: 400;
+  font-size: 0.8rem;
+}
+
+.admin-sector-price {
+  flex-shrink: 0;
+}
+
+.admin-sector-price .admin-field {
+  margin-bottom: 0;
+}
+
+.admin-input--price {
+  width: 5.5rem;
+  margin-bottom: 0;
+  padding: 0.5rem 0.6rem;
+  font-size: 0.85rem;
+}
+
+.admin-list-button--sectors {
+  background: #0b6f8c !important;
+}
+
 @media (max-width: 600px) {
   .admin-page {
     padding: 1rem;
