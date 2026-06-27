@@ -45,8 +45,11 @@ INSERT INTO `Documento` VALUES
 	(1,'12345678','ARG'),
 	(3,'11223344','ESP'),
 	(3,'55667788','MEX'),
+	(1,'12345678','URU'),
 	(1,'87654321','URU'),
-	(1,'12345678','URU');
+	(1,'78654321','URU'),
+	(1,'76584321','URU'),
+	(1,'56743821','URU');
 
 --
 -- Dumping data for table `Equipo`
@@ -122,14 +125,32 @@ INSERT INTO `EventoHabilitaSector` (`id_evento`, `id_sector`, `nombre_estadio`, 
 -- Dumping data for table `Usuario`
 --
 
-INSERT INTO `Usuario` VALUES
-	('test@example.com','Usuario Test','b460b1982188f11d175f60ed670027e1afdd16558919fe47023ecd38329e0b7f',1,'12345678','URU',1,'URU'), -- Contra hola123
-	('test1@example.com','Usuario Test 1','b460b1982188f11d175f60ed670027e1afdd16558919fe47023ecd38329e0b7f',1,'87654321','URU',1,'URU'); -- Contra hola123
+INSERT INTO `Usuario` VALUES -- Contra hola123 para todos
+	('test1@example.com','Usuario Test 1','b460b1982188f11d175f60ed670027e1afdd16558919fe47023ecd38329e0b7f',1,'12345678','URU',1,'URU'),
+	('test2@example.com','Usuario Test 2','b460b1982188f11d175f60ed670027e1afdd16558919fe47023ecd38329e0b7f',1,'87654321','URU',1,'URU'),
+	('test3@example.com','Usuario Test 3','b460b1982188f11d175f60ed670027e1afdd16558919fe47023ecd38329e0b7f',1,'78654321','URU',1,'URU'),
+	('admin@example.com','Administrador','b460b1982188f11d175f60ed670027e1afdd16558919fe47023ecd38329e0b7f',1,'76584321','URU',1,'URU'),
+	('funcionario@example.com','Funcionario','b460b1982188f11d175f60ed670027e1afdd16558919fe47023ecd38329e0b7f',1,'56743821','URU',1,'URU');
 
 --
 -- Dumping data for table `UsuarioGeneral`
 --
 
 INSERT INTO `UsuarioGeneral` VALUES
-	('test@example.com','VERIFICADO','2026-06-26 07:58:22'),
-	('test1@example.com','VERIFICADO','2026-06-26 07:58:22');
+	('test1@example.com','VERIFICADO','2026-06-26 07:58:22'),
+	('test2@example.com','VERIFICADO','2026-06-26 07:58:22'),
+	('test3@example.com','VERIFICADO','2026-06-26 07:58:22');
+
+--
+-- Dumping data for table `Administrador`
+--
+
+INSERT INTO `Administrador` VALUES
+	('admin@example.com', '2026-06-26 07:58:22', 'MEX');
+
+--
+-- Dumping data for table `Funcionario`
+--
+
+INSERT INTO `Funcionario` VALUES
+	('admin@example.com', '123456');
