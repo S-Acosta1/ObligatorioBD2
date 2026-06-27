@@ -1,9 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import { fetchEvento, fetchEventSectors } from "../api";
 import "./purchase.css";
 
-export default function Purchase({ selectedMatch, onBackToHome, onConfirmPurchase, onNotify }) {
+export default function Purchase({ onBackToHome, onConfirmPurchase, onNotify }) {
+  const { eventId } = useParams();
+  const [match, setMatch] = useState(null);
   const [quantity, setQuantity] = useState(1);
-  const [ticketType, setTicketType] = useState("general");
+  const [sectors, setSectors] = useState([]);
+  const [selectedSector, setSelectedSector] = useState(null);
+  const [loadingSectors, setLoadingSectors] = useState(true);
   const [documentType, setDocumentType] = useState("dni_ci");
   const [documentNumber, setDocumentNumber] = useState("");
   const [buyerName, setBuyerName] = useState("");
@@ -19,14 +25,60 @@ export default function Purchase({ selectedMatch, onBackToHome, onConfirmPurchas
     return value.replace(/\D/g, "").slice(0, 8);
   };
 
-  if (!selectedMatch) {
+  useEffect(() => {
+    if (!eventId) return;
+
+    fetchEvento(eventId)
+      .then((data) => {
+        const [date, timeFull] = data.fechaHora.split("T");
+        const time = timeFull.slice(0, 5);
+        setMatch({
+          id: data.id,
+          selection: data.equipoLocal,
+          rival: data.equipoVisitante,
+          competition: "",
+          stadium: data.estadio,
+          city: data.ubicacion,
+          date,
+          time,
+          price: 0,
+        });
+      })
+      .catch(() => {
+        if (typeof onNotify === "function") {
+          onNotify("No se pudieron cargar los datos del evento.", "error");
+        }
+      });
+  }, [eventId]);
+
+  useEffect(() => {
+    if (!match?.id) return;
+
+    setLoadingSectors(true);
+    fetchEventSectors(match.id)
+      .then((data) => {
+        setSectors(data);
+        if (data.length > 0) {
+          setSelectedSector(data[0]);
+        }
+        setLoadingSectors(false);
+      })
+      .catch(() => {
+        setSectors([]);
+        setLoadingSectors(false);
+        if (typeof onNotify === "function") {
+          onNotify("No se pudieron cargar los sectores disponibles.", "error");
+        }
+      });
+  }, [match?.id]);
+
+  if (!match) {
     return null;
   }
 
-  const basePrice = selectedMatch.price;
-  const ticketMultiplier = ticketType === "vip" ? 1.6 : ticketType === "platea" ? 1.25 : 1;
-  const subtotal = selectedMatch.price * quantity;
-  const totalPrice = Math.round(basePrice * quantity * ticketMultiplier);
+  const basePrice = match.price || 0;
+  const subtotal = basePrice * quantity;
+  const totalPrice = subtotal;
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -39,19 +91,28 @@ export default function Purchase({ selectedMatch, onBackToHome, onConfirmPurchas
       return;
     }
 
+    if (!selectedSector) {
+      if (typeof onNotify === "function") {
+        onNotify("Seleccioná un sector disponible.", "error");
+      }
+
+      return;
+    }
+
     if (typeof onConfirmPurchase === "function") {
       onConfirmPurchase({
-        matchId: selectedMatch.id,
-        selection: selectedMatch.selection,
-        rival: selectedMatch.rival,
-        competition: selectedMatch.competition,
-        stadium: selectedMatch.stadium,
-        city: selectedMatch.city,
-        date: selectedMatch.date,
-        time: selectedMatch.time,
-        basePrice: selectedMatch.price,
+        matchId: match.id,
+        selection: match.selection,
+        rival: match.rival,
+        competition: match.competition,
+        stadium: match.stadium,
+        city: match.city,
+        date: match.date,
+        time: match.time,
+        basePrice,
         quantity,
-        ticketType,
+        sectorId: selectedSector.idSector,
+        sectorName: selectedSector.nombre,
         documentType,
         documentNumber,
         buyerName,
@@ -78,7 +139,7 @@ export default function Purchase({ selectedMatch, onBackToHome, onConfirmPurchas
 
       <section className="purchase-summary">
         <p className="purchase-kicker">Checkout oficial</p>
-        <h1 className="purchase-title">{selectedMatch.selection} vs {selectedMatch.rival}</h1>
+        <h1 className="purchase-title">{match.selection} vs {match.rival}</h1>
         <p className="purchase-description">
           Completá los datos para confirmar la compra de las entradas del partido seleccionado.
         </p>
@@ -90,11 +151,11 @@ export default function Purchase({ selectedMatch, onBackToHome, onConfirmPurchas
         </div>
 
         <div className="purchase-matchbox">
-          <p><strong>Competencia:</strong> {selectedMatch.competition}</p>
-          <p><strong>Estadio:</strong> {selectedMatch.stadium}</p>
-          <p><strong>Ciudad:</strong> {selectedMatch.city}</p>
-          <p><strong>Fecha:</strong> {selectedMatch.date} · {selectedMatch.time}</p>
-          <p><strong>Precio base:</strong> ${selectedMatch.price}</p>
+          <p><strong>Competencia:</strong> {match.competition}</p>
+          <p><strong>Estadio:</strong> {match.stadium}</p>
+          <p><strong>Ciudad:</strong> {match.city}</p>
+          <p><strong>Fecha:</strong> {match.date} · {match.time}</p>
+          <p><strong>Precio base:</strong> ${basePrice}</p>
         </div>
 
         <button type="button" className="purchase-back" onClick={onBackToHome}>
@@ -111,12 +172,30 @@ export default function Purchase({ selectedMatch, onBackToHome, onConfirmPurchas
         <form className="purchase-form" onSubmit={handleSubmit}>
           <div className="purchase-grid">
             <div className="purchase-field">
-              <label>Tipo de entrada</label>
-              <select value={ticketType} onChange={(e) => setTicketType(e.target.value)}>
-                <option value="general">General</option>
-                <option value="platea">Platea</option>
-                <option value="vip">VIP</option>
-              </select>
+              <label>Sector</label>
+              {loadingSectors ? (
+                <select disabled>
+                  <option>Cargando sectores...</option>
+                </select>
+              ) : sectors.length === 0 ? (
+                <select disabled>
+                  <option>No hay sectores disponibles</option>
+                </select>
+              ) : (
+                <select
+                  value={selectedSector?.idSector ?? ""}
+                  onChange={(e) => {
+                    const sector = sectors.find((s) => s.idSector === Number(e.target.value));
+                    setSelectedSector(sector);
+                  }}
+                >
+                  {sectors.map((sector) => (
+                    <option key={sector.idSector} value={sector.idSector}>
+                      Sector {sector.nombre} ({sector.asientosDisponibles} disponibles)
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
             <div className="purchase-field">
               <label>Cantidad de entradas</label>
@@ -201,8 +280,8 @@ export default function Purchase({ selectedMatch, onBackToHome, onConfirmPurchas
               <strong>${subtotal}</strong>
             </div>
             <div>
-              <span>Ajuste por tipo</span>
-              <strong>{ticketType.toUpperCase()}</strong>
+              <span>Sector</span>
+              <strong>{selectedSector ? `Sector ${selectedSector.nombre}` : "-"}</strong>
             </div>
             <div>
               <span>Total estimado</span>

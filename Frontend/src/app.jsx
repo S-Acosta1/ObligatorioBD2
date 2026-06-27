@@ -76,7 +76,6 @@ export default function App() {
   const [currentRole, setCurrentRole] = useState("user");
   const [currentUser, setCurrentUser] = useState(null);
   const [adminSection, setAdminSection] = useState("home");
-  const [selectedMatch, setSelectedMatch] = useState(null);
   const [ownedTickets, setOwnedTickets] = useState([]);
   const [loginError, setLoginError] = useState(null);
   const [notification, setNotification] = useState(null);
@@ -143,8 +142,7 @@ export default function App() {
   };
 
   const handleBuyTicket = (match) => {
-    setSelectedMatch(match);
-    navigate("/purchase");
+    navigate(`/purchase/${match.id}`);
   };
 
   const handleLoginSuccess = async ({ email, password }) => {
@@ -188,7 +186,6 @@ export default function App() {
         pendingTransfer: null,
       },
     ]);
-    setSelectedMatch(null);
     navigate("/home");
   };
 
@@ -379,23 +376,19 @@ export default function App() {
           path="/worker"
           element={
             <ProtectedRoute requiredRole="worker">
-              <Dashboard role="worker" onLogout={handleLogout} />
+              <Dashboard role="worker" onLogout={handleLogout} onNotify={showNotification} />
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/purchase"
-          element={
-            <ProtectedRoute>
-              <Purchase
-                selectedMatch={selectedMatch}
-                onConfirmPurchase={handleConfirmPurchase}
-                onNotify={showNotification}
-                onBackToHome={() => navigate("/home")}
-              />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/purchase/:eventId" element={
+          <ProtectedRoute>
+            <Purchase
+              onConfirmPurchase={handleConfirmPurchase}
+              onNotify={showNotification}
+              onBackToHome={() => navigate("/home")}
+            />
+          </ProtectedRoute>
+        } />
         <Route
           path="/profile"
           element={
