@@ -8,6 +8,7 @@ public static class TransferenciaEndpoints
     public static void MapTransferenciaEndpoints(this WebApplication app)
     {
         app.MapGet("/api/transferencias/pendientes-recibidas", GetPendientesRecibidas).RequireAuthorization();
+        app.MapGet("/api/transferencias/historial", GetHistorial).RequireAuthorization();
         app.MapPost("/api/transferencias", CrearTransferencia).RequireAuthorization();
         app.MapPut("/api/transferencias/{id}/aceptar", AceptarTransferencia).RequireAuthorization();
         app.MapPut("/api/transferencias/{id}/rechazar", RechazarTransferencia).RequireAuthorization();
@@ -83,6 +84,76 @@ public static class TransferenciaEndpoints
                 montoTotal = reader.GetDecimal(16),
                 holderNombre = reader.GetString(17),
                 buyerNombre = reader.GetString(18),
+            });
+        }
+
+        return Results.Ok(transfers);
+    }
+
+    private static async Task<IResult> GetHistorial(HttpContext http, IUsuarioLecturaDatabase db)
+    {
+        var email = http.User.FindFirstValue(ClaimTypes.Email);
+        if (string.IsNullOrEmpty(email))
+            return Results.Unauthorized();
+
+        using var conn = db.CreateConnection();
+        conn.Open();
+
+        var cmd = conn.CreateCommand();
+        cmd.CommandText = @"
+            SELECT
+                t.id_transferencia,
+                t.email_usuario_origen,
+                t.email_usuario_recibe,
+                t.fecha_hora,
+                t.estado,
+                tce.id_entrada,
+                e.precio,
+                e.nombre_estadio,
+                e.id_evento,
+                e.id_sector,
+                ev.fecha_hora AS evento_fecha_hora,
+                ev.ubicacion,
+                ev.nombre_equipo_a,
+                ev.nombre_equipo_b,
+                s.nombre AS sector_nombre,
+                uor.nombre AS origen_nombre,
+                urec.nombre AS recibe_nombre
+            FROM Transferencia t
+            JOIN TransferenciaContieneEntrada tce ON tce.id_transferencia = t.id_transferencia
+            JOIN Entrada e ON e.id_entrada = tce.id_entrada
+            JOIN Evento ev ON ev.id_evento = e.id_evento
+            JOIN Sector s ON s.id_sector = e.id_sector AND s.nombre_estadio = e.nombre_estadio
+            JOIN Usuario uor ON uor.email = t.email_usuario_origen
+            JOIN Usuario urec ON urec.email = t.email_usuario_recibe
+            WHERE (t.email_usuario_origen = @email OR t.email_usuario_recibe = @email)
+              AND t.estado IN ('ACEPTADA', 'RECHAZADA')
+            ORDER BY t.fecha_hora DESC";
+        cmd.Parameters.Add(new MySql.Data.MySqlClient.MySqlParameter("@email", email));
+
+        using var reader = cmd.ExecuteReader();
+        var transfers = new List<object>();
+        while (reader.Read())
+        {
+            transfers.Add(new
+            {
+                idTransferencia = reader.GetInt32(0),
+                emailOrigen = reader.GetString(1),
+                emailRecibe = reader.GetString(2),
+                fechaHora = reader.GetDateTime(3),
+                estado = reader.GetString(4),
+                idEntrada = reader.GetInt32(5),
+                precio = reader.GetDecimal(6),
+                nombreEstadio = reader.GetString(7),
+                idEvento = reader.GetInt32(8),
+                idSector = reader.GetInt32(9),
+                eventoFechaHora = reader.GetDateTime(10),
+                ubicacion = reader.GetString(11),
+                equipoLocal = reader.GetString(12),
+                equipoVisitante = reader.GetString(13),
+                sectorNombre = reader.GetString(14),
+                origenNombre = reader.GetString(15),
+                recibeNombre = reader.GetString(16),
             });
         }
 

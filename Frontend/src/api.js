@@ -194,6 +194,19 @@ export async function fetchPendientesRecibidas() {
   return response.json();
 }
 
+export async function fetchHistorialTransferencias() {
+  const token = getToken();
+  const response = await fetch(`${API_URL}/api/transferencias/historial`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (!response.ok) {
+    throw new Error("No se pudo obtener el historial de transferencias.");
+  }
+
+  return response.json();
+}
+
 export async function acceptTransferencia(id) {
   const token = getToken();
   const response = await fetch(`${API_URL}/api/transferencias/${id}/aceptar`, {
