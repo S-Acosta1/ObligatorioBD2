@@ -7,6 +7,7 @@ export default function HomeA({
     onMatches,
     onTickets,
     onReports,
+    onConfiguration,
     onLogout
 }) {
     return (
@@ -24,8 +25,8 @@ export default function HomeA({
                     </h1>
 
                     <p className="home-description">
-                        Desde aquí podrás administrar usuarios,
-                        partidos, entradas y consultar reportes.
+                        Desde aquí podrás administrar eventos,
+                        configuración del sistema y consultar reportes.
                     </p>
 
                     <div className="home-heroStats">
@@ -37,7 +38,7 @@ export default function HomeA({
 
                         <article>
                             <strong>{stats.matches}</strong>
-                            <span>Partidos</span>
+                            <span>Eventos</span>
                         </article>
 
                         <article>
@@ -65,10 +66,10 @@ export default function HomeA({
             <section className="home-matches">
 
                 <article className="match-card">
-                    <h2>Usuarios</h2>
+                    <h2>Funcionarios</h2>
 
                     <p>
-                        Alta, baja y modificación de usuarios.
+                        Alta, baja, modificación y asignación de funcionarios.
                     </p>
 
                     <button
@@ -81,10 +82,10 @@ export default function HomeA({
                 </article>
 
                 <article className="match-card">
-                    <h2>Partidos</h2>
+                    <h2>Eventos</h2>
 
                     <p>
-                        Gestionar encuentros del Mundial.
+                        Crear eventos, modificar partidos y habilitar sectores.
                     </p>
 
                     <button
@@ -97,15 +98,15 @@ export default function HomeA({
                 </article>
 
                 <article className="match-card">
-                    <h2>Entradas</h2>
+                    <h2>Configuración</h2>
 
                     <p>
-                        Consultar disponibilidad y ventas.
+                        Gestionar estadios, equipos, sectores y dispositivos.
                     </p>
 
                     <button
                         className="match-card__buy"
-                        onClick={onTickets}
+                        onClick={onConfiguration}
                     >
                         Administrar
                     </button>
@@ -116,7 +117,7 @@ export default function HomeA({
                     <h2>Reportes</h2>
 
                     <p>
-                        Estadísticas del sistema.
+                        Ranking de compradores y eventos con mayores ventas.
                     </p>
 
                     <button
@@ -125,11 +126,8 @@ export default function HomeA({
                     >
                         Ver reportes
                     </button>
-
                 </article>
-
             </section>
-
         </main>
     );
 }
