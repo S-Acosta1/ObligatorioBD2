@@ -28,6 +28,7 @@ public static class EventoEndpoints
         cmd.CommandText = @"
             SELECT e.id_evento, est.nombre, el.nombre, ev.nombre,
                    e.fecha_hora, e.ubicacion,
+                   e.pais_equipo_a, e.pais_equipo_b,
                    COALESCE(SUM(ehs.asientos_disponibles), 0) AS asientos_disponibles
             FROM Evento e
             JOIN Estadio est ON est.nombre = e.nombre_estadio
@@ -35,7 +36,8 @@ public static class EventoEndpoints
             JOIN Equipo ev  ON ev.nombre = e.nombre_equipo_b AND ev.cod_pais = e.pais_equipo_b
             LEFT JOIN EventoHabilitaSector ehs ON ehs.id_evento = e.id_evento
             GROUP BY e.id_evento, est.nombre, el.nombre, ev.nombre,
-                     e.fecha_hora, e.ubicacion
+                     e.fecha_hora, e.ubicacion,
+                     e.pais_equipo_a, e.pais_equipo_b
             ORDER BY e.fecha_hora DESC";
 
         using var reader = cmd.ExecuteReader();
@@ -50,7 +52,9 @@ public static class EventoEndpoints
                 equipoVisitante = reader.GetString(3),
                 fechaHora = reader.GetDateTime(4),
                 ubicacion = reader.GetString(5),
-                asientosDisponibles = reader.GetInt32(6)
+                paisEquipoLocal = reader.GetString(6),
+                paisEquipoVisitante = reader.GetString(7),
+                asientosDisponibles = reader.GetInt32(8)
             });
         }
 
@@ -65,7 +69,8 @@ public static class EventoEndpoints
         var cmd = conn.CreateCommand();
         cmd.CommandText = @"
             SELECT e.id_evento, est.nombre, el.nombre, ev.nombre,
-                   e.fecha_hora, e.ubicacion
+                   e.fecha_hora, e.ubicacion,
+                   e.pais_equipo_a, e.pais_equipo_b
             FROM Evento e
             JOIN Estadio est ON est.nombre = e.nombre_estadio
             JOIN Equipo el  ON el.nombre = e.nombre_equipo_a AND el.cod_pais = e.pais_equipo_a
@@ -85,7 +90,9 @@ public static class EventoEndpoints
             equipoLocal = reader.GetString(2),
             equipoVisitante = reader.GetString(3),
             fechaHora = reader.GetDateTime(4),
-            ubicacion = reader.GetString(5)
+            ubicacion = reader.GetString(5),
+            paisEquipoLocal = reader.GetString(6),
+            paisEquipoVisitante = reader.GetString(7)
         });
     }
 
