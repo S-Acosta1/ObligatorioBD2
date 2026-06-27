@@ -11,7 +11,7 @@ import {
   getEscaners,
   crearEscaner,
   eliminarEscaner
-} from "../AdminAPI";
+} from "../api";
 
 export default function AdminConfiguracion() {
   const [equipos, setEquipos] = useState([]);

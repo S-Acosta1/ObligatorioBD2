@@ -1,12 +1,35 @@
 import { getToken } from "./token.js";
 
-const API_URL = import.meta.env.VITE_API_URL || null;
-if (API_URL == null) {
-	console.error("Missing VITE_API_URL");
+const API_URL = (import.meta.env.VITE_API_URL || "http://localhost:5167") + "/api";
+
+async function request(url, options = {}) {
+  const { auth = false, ...fetchOptions } = options;
+  const headers = {
+    "Content-Type": "application/json",
+    ...(fetchOptions.headers || {}),
+  };
+
+  if (auth) {
+    headers.Authorization = `Bearer ${getToken()}`;
+  }
+
+  const response = await fetch(`${API_URL}${url}`, {
+    ...fetchOptions,
+    headers,
+  });
+
+  if (!response.ok) {
+    const error = await response.text().catch(() => "");
+    throw new Error(error || "Error en la petición");
+  }
+
+  return response.status === 204 ? null : response.json();
 }
 
+// ── Auth ──
+
 export async function login(email, password) {
-  const response = await fetch(`${API_URL}/api/auth/login`, {
+  const response = await fetch(`${API_URL}/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),
@@ -23,7 +46,7 @@ export async function login(email, password) {
 }
 
 export async function registerUser(data) {
-  const response = await fetch(`${API_URL}/api/auth/register`, {
+  const response = await fetch(`${API_URL}/auth/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
@@ -38,229 +61,244 @@ export async function registerUser(data) {
   return body;
 }
 
-export async function fetchTiposDocumento() {
-  const response = await fetch(`${API_URL}/api/tipos-documento`);
-
-  if (!response.ok) {
-    throw new Error("No se pudieron obtener los tipos de documento.");
-  }
-
-  return response.json();
-}
+// ── Paises / Tipo Documento (public) ──
 
 export async function fetchPaises() {
-  const response = await fetch(`${API_URL}/api/paises`);
-
-  if (!response.ok) {
-    throw new Error("No se pudieron obtener los países.");
-  }
-
-  return response.json();
+  return request("/paises");
 }
 
-export async function fetchEstadios() {
-  const response = await fetch(`${API_URL}/api/estadios`);
-
-  if (!response.ok) {
-    throw new Error("No se pudieron obtener los estadios.");
-  }
-
-  return response.json();
+export async function fetchTiposDocumento() {
+  return request("/tipos-documento");
 }
 
-export async function fetchEventSectors(eventId) {
-  const response = await fetch(`${API_URL}/api/eventos/${eventId}/sectores-habilitados`);
+// ── Eventos (public reads, auth writes) ──
 
-  if (!response.ok) {
-    throw new Error("No se pudieron obtener los sectores del evento.");
-  }
+export async function fetchEventos() {
+  return request("/eventos");
+}
 
-  return response.json();
+export async function getEventos() {
+  return request("/eventos", { auth: true });
 }
 
 export async function fetchEvento(id) {
-  const response = await fetch(`${API_URL}/api/eventos/${id}`);
-
-  if (!response.ok) {
-    throw new Error("No se pudo obtener el evento.");
-  }
-
-  return response.json();
+  return request(`/eventos/${id}`);
 }
 
-export async function fetchEventos() {
-  const response = await fetch(`${API_URL}/api/eventos`);
-
-  if (!response.ok) {
-    throw new Error("No se pudieron obtener los eventos.");
-  }
-
-  return response.json();
+export async function crearEvento(data) {
+  return request("/eventos", { method: "POST", body: JSON.stringify(data), auth: true });
 }
+
+export async function modificarEvento(id, data) {
+  return request(`/eventos/${id}`, { method: "PUT", body: JSON.stringify(data), auth: true });
+}
+
+export async function eliminarEvento(id) {
+  return request(`/eventos/${id}`, { method: "DELETE", auth: true });
+}
+
+// ── Sectores habilitados ──
+
+export async function fetchEventSectors(eventId) {
+  return request(`/eventos/${eventId}/sectores-habilitados`);
+}
+
+export async function getSectoresHabilitados(idEvento) {
+  return request(`/eventos/${idEvento}/sectores-habilitados`);
+}
+
+export async function habilitarSector(data) {
+  return request(`/eventos/${data.idEvento}/sectores-habilitados`, {
+    method: "POST",
+    body: JSON.stringify(data),
+    auth: true,
+  });
+}
+
+export async function deshabilitarSector(idEvento, idSector) {
+  return request(`/eventos/${idEvento}/sectores-habilitados/${idSector}`, {
+    method: "DELETE",
+    auth: true,
+  });
+}
+
+// ── Estadios (public reads, auth writes) ──
+
+export async function fetchEstadios() {
+  return request("/estadios");
+}
+
+export async function getEstadios() {
+  return request("/estadios", { auth: true });
+}
+
+export async function crearEstadio(data) {
+  return request("/estadios", { method: "POST", body: JSON.stringify(data), auth: true });
+}
+
+export async function modificarEstadio(nombre, data) {
+  return request(`/estadios/${nombre}`, { method: "PUT", body: JSON.stringify(data), auth: true });
+}
+
+export async function eliminarEstadio(nombre) {
+  return request(`/estadios/${nombre}`, { method: "DELETE", auth: true });
+}
+
+// ── Sectores ──
+
+export async function getSectores(nombreEstadio) {
+  return request(`/estadios/${nombreEstadio}/sectores`, { auth: true });
+}
+
+export async function crearSector(nombreEstadio, data) {
+  return request(`/estadios/${nombreEstadio}/sectores`, {
+    method: "POST",
+    body: JSON.stringify(data),
+    auth: true,
+  });
+}
+
+export async function modificarSector(nombreEstadio, idSector, data) {
+  return request(`/estadios/${nombreEstadio}/sectores/${idSector}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+    auth: true,
+  });
+}
+
+export async function eliminarSector(nombreEstadio, idSector) {
+  return request(`/estadios/${nombreEstadio}/sectores/${idSector}`, {
+    method: "DELETE",
+    auth: true,
+  });
+}
+
+// ── Equipos ──
+
+export async function getEquipos() {
+  return request("/equipos", { auth: true });
+}
+
+export async function crearEquipo(data) {
+  return request("/equipos", { method: "POST", body: JSON.stringify(data), auth: true });
+}
+
+export async function modificarEquipo(nombre, codPais, data) {
+  return request(`/equipos/${nombre}/${codPais}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+    auth: true,
+  });
+}
+
+export async function eliminarEquipo(nombre, codPais) {
+  return request(`/equipos/${nombre}/${codPais}`, { method: "DELETE", auth: true });
+}
+
+// ── Escaners ──
+
+export async function getEscaners() {
+  return request("/escaners", { auth: true });
+}
+
+export async function crearEscaner(data) {
+  return request("/escaners", { method: "POST", body: JSON.stringify(data), auth: true });
+}
+
+export async function eliminarEscaner(id, nombreEstadio) {
+  return request(`/escaners/${id}/${nombreEstadio}`, { method: "DELETE", auth: true });
+}
+
+// ── Funcionarios ──
+
+export async function getFuncionarios() {
+  return request("/funcionarios", { auth: true });
+}
+
+export async function crearFuncionario(data) {
+  return request("/funcionarios", { method: "POST", body: JSON.stringify(data), auth: true });
+}
+
+export async function eliminarFuncionario(email) {
+  return request(`/funcionarios/${email}`, { method: "DELETE", auth: true });
+}
+
+export async function modificarFuncionario(email, data) {
+  return request(`/funcionarios/${email}`, { method: "PUT", body: JSON.stringify(data), auth: true });
+}
+
+// ── Asignaciones ──
+
+export async function asignarFuncionario(data) {
+  return request("/asignaciones", { method: "POST", body: JSON.stringify(data), auth: true });
+}
+
+export async function desasignarFuncionario(data) {
+  return request("/asignaciones", { method: "DELETE", body: JSON.stringify(data), auth: true });
+}
+
+// ── Reportes ──
+
+export async function getRankingCompradores() {
+  return request("/reportes/ranking-compradores", { auth: true });
+}
+
+export async function getEventosMayorVenta() {
+  return request("/reportes/eventos-mayores-ventas", { auth: true });
+}
+
+// ── Entradas / Compras ──
 
 export async function createPurchase(data) {
-  const token = getToken();
-  const response = await fetch(`${API_URL}/api/compras`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(data),
-  });
-
-  if (!response.ok) {
-    const body = await response.json().catch(() => ({}));
-    throw new Error(body.mensaje || "Error al procesar la compra.");
-  }
-
-  return response.json();
+  return request("/compras", { method: "POST", body: JSON.stringify(data), auth: true });
 }
 
 export async function fetchEntradas(email) {
-  const token = getToken();
-  const response = await fetch(`${API_URL}/api/usuarios/${encodeURIComponent(email)}/entradas`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error("No se pudieron obtener las entradas.");
-  }
-
-  return response.json();
+  return request(`/usuarios/${encodeURIComponent(email)}/entradas`, { auth: true });
 }
 
 export async function fetchEntradasCompradas(email) {
-  const token = getToken();
-  const response = await fetch(`${API_URL}/api/usuarios/${encodeURIComponent(email)}/compras`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error("No se pudieron obtener las compras.");
-  }
-
-  return response.json();
+  return request(`/usuarios/${encodeURIComponent(email)}/compras`, { auth: true });
 }
+
+// ── Usuarios ──
 
 export async function fetchUserByEmail(email) {
-  const token = getToken();
-  const response = await fetch(`${API_URL}/api/usuarios/buscar/${encodeURIComponent(email)}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error("Usuario no encontrado");
-  }
-
-  return response.json();
-}
-
-export async function createTransferencia(idEntrada, emailRecibe) {
-  const token = getToken();
-  const response = await fetch(`${API_URL}/api/transferencias`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({ IdEntrada: idEntrada, EmailRecibe: emailRecibe }),
-  });
-
-  if (!response.ok) {
-    const body = await response.json().catch(() => ({}));
-    throw new Error(body.mensaje || "Error al crear la transferencia.");
-  }
-
-  return response.json();
-}
-
-export async function fetchPendientesRecibidas() {
-  const token = getToken();
-  const response = await fetch(`${API_URL}/api/transferencias/pendientes-recibidas`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-
-  if (!response.ok) {
-    throw new Error("No se pudieron obtener las transferencias pendientes.");
-  }
-
-  return response.json();
-}
-
-export async function fetchHistorialTransferencias() {
-  const token = getToken();
-  const response = await fetch(`${API_URL}/api/transferencias/historial`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-
-  if (!response.ok) {
-    throw new Error("No se pudo obtener el historial de transferencias.");
-  }
-
-  return response.json();
-}
-
-export async function acceptTransferencia(id) {
-  const token = getToken();
-  const response = await fetch(`${API_URL}/api/transferencias/${id}/aceptar`, {
-    method: "PUT",
-    headers: { Authorization: `Bearer ${token}` },
-  });
-
-  if (!response.ok) {
-    const body = await response.json().catch(() => ({}));
-    throw new Error(body.mensaje || "Error al aceptar la transferencia.");
-  }
-
-  return response.json();
-}
-
-export async function rejectTransferencia(id) {
-  const token = getToken();
-  const response = await fetch(`${API_URL}/api/transferencias/${id}/rechazar`, {
-    method: "PUT",
-    headers: { Authorization: `Bearer ${token}` },
-  });
-
-  if (!response.ok) {
-    const body = await response.json().catch(() => ({}));
-    throw new Error(body.mensaje || "Error al rechazar la transferencia.");
-  }
-
-  return response.json();
-}
-
-export async function fetchQrCode(ticketId) {
-  const token = getToken();
-  const response = await fetch(`${API_URL}/api/entradas/${ticketId}/qr`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-
-  if (!response.ok) {
-    throw new Error("No se pudo obtener el código QR.");
-  }
-
-  return response.json();
+  return request(`/usuarios/buscar/${encodeURIComponent(email)}`, { auth: true });
 }
 
 export async function fetchProfile(email) {
-  const token = getToken();
-  const response = await fetch(`${API_URL}/api/usuarios/${encodeURIComponent(email)}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+  return request(`/usuarios/${encodeURIComponent(email)}`, { auth: true });
+}
+
+// ── Transferencias ──
+
+export async function createTransferencia(idEntrada, emailRecibe) {
+  return request("/transferencias", {
+    method: "POST",
+    body: JSON.stringify({ IdEntrada: idEntrada, EmailRecibe: emailRecibe }),
+    auth: true,
   });
+}
 
-  if (!response.ok) {
-    throw new Error("No se pudo obtener el perfil.");
-  }
+export async function fetchPendientesRecibidas() {
+  return request("/transferencias/pendientes-recibidas", { auth: true });
+}
 
-  return response.json();
+export async function fetchHistorialTransferencias() {
+  return request("/transferencias/historial", { auth: true });
+}
+
+export async function acceptTransferencia(id) {
+  return request(`/transferencias/${id}/aceptar`, { method: "PUT", auth: true });
+}
+
+export async function rejectTransferencia(id) {
+  return request(`/transferencias/${id}/rechazar`, { method: "PUT", auth: true });
+}
+
+// ── QR ──
+
+export async function fetchQrCode(ticketId) {
+  return request(`/entradas/${ticketId}/qr`, { auth: true });
 }
