@@ -127,6 +127,14 @@ export async function deshabilitarSector(idEvento, idSector) {
   });
 }
 
+export async function actualizarPrecioSector(idEvento, idSector, precio) {
+  return request(`/eventos/${idEvento}/sectores-habilitados/${idSector}`, {
+    method: "PUT",
+    body: JSON.stringify({ precio }),
+    auth: true,
+  });
+}
+
 // ── Equipos (public reads, auth writes) ──
 
 export async function fetchEquipos() {

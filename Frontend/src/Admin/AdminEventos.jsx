@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
-import { getEventos, crearEvento, modificarEvento, habilitarSector, fetchPaises, getEquipos, getEstadios } from "../api";
+import { getEventos, crearEvento, modificarEvento, habilitarSector, deshabilitarSector, actualizarPrecioSector, getSectores, getSectoresHabilitados, fetchPaises, getEquipos, getEstadios } from "../api";
 
 const emptyForm = {
   fechaHora: "",
@@ -21,6 +21,13 @@ export default function AdminEventos() {
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [modalForm, setModalForm] = useState(emptyForm);
+
+  const [showSectorModal, setShowSectorModal] = useState(false);
+  const [sectorEvent, setSectorEvent] = useState(null);
+  const [stadiumSectors, setStadiumSectors] = useState([]);
+  const [enabledSectors, setEnabledSectors] = useState({});
+  const [sectorPrices, setSectorPrices] = useState({});
+  const [sectorLoading, setSectorLoading] = useState(false);
 
   useEffect(() => { load(); }, []);
 
@@ -84,14 +91,74 @@ export default function AdminEventos() {
     }
   }
 
-  async function sector(id, estadio) {
+  async function openSectorModal(event) {
+    setSectorEvent(event);
+    setShowSectorModal(true);
+    setSectorLoading(true);
+
     try {
-      await habilitarSector({
-        idEvento: id,
-        idSector: 1,
-        nombreEstadio: estadio
+      const [allSectores, habilitados] = await Promise.all([
+        getSectores(event.estadio),
+        getSectoresHabilitados(event.id),
+      ]);
+      setStadiumSectors(allSectores);
+
+      const enabledMap = {};
+      const prices = {};
+      habilitados.forEach(s => {
+        enabledMap[s.idSector] = true;
+        prices[s.idSector] = s.precio;
       });
-      onNotify?.("Sector habilitado con éxito.", "success");
+      setEnabledSectors(enabledMap);
+      setSectorPrices(prices);
+    } catch (error) {
+      onNotify?.(error.message, "error");
+    } finally {
+      setSectorLoading(false);
+    }
+  }
+
+  function toggleSector(idSector) {
+    setEnabledSectors(prev => ({ ...prev, [idSector]: !prev[idSector] }));
+  }
+
+  function setSectorPrice(idSector, price) {
+    setSectorPrices(prev => ({ ...prev, [idSector]: price }));
+  }
+
+  async function saveSectors() {
+    if (!sectorEvent) return;
+
+    try {
+      const habilitados = await getSectoresHabilitados(sectorEvent.id);
+      const previouslyEnabled = {};
+      habilitados.forEach(s => { previouslyEnabled[s.idSector] = s; });
+
+      for (const sector of stadiumSectors) {
+        const isNowEnabled = enabledSectors[sector.id] || false;
+        const wasEnabled = previouslyEnabled[sector.id] !== undefined;
+        const price = Number(sectorPrices[sector.id]) || 0;
+
+        if (isNowEnabled && !wasEnabled) {
+          await habilitarSector({
+            idEvento: sectorEvent.id,
+            idSector: sector.id,
+            nombreEstadio: sectorEvent.estadio,
+            precio: price,
+          });
+        } else if (!isNowEnabled && wasEnabled) {
+          await deshabilitarSector(sectorEvent.id, sector.id);
+        } else if (isNowEnabled && wasEnabled) {
+          const oldPrice = previouslyEnabled[sector.id].precio;
+          if (Number(oldPrice) !== price) {
+            await actualizarPrecioSector(sectorEvent.id, sector.id, price);
+          }
+        }
+      }
+
+      onNotify?.("Sectores actualizados con éxito.", "success");
+      setShowSectorModal(false);
+      setSectorEvent(null);
     } catch (error) {
       onNotify?.(error.message, "error");
     }
@@ -189,6 +256,53 @@ export default function AdminEventos() {
         </div>
       )}
 
+      {showSectorModal && sectorEvent && (
+        <div className="admin-modal-overlay" onClick={() => { setShowSectorModal(false); setSectorEvent(null); }}>
+          <div className="admin-modal admin-modal--sectors" onClick={e => e.stopPropagation()}>
+            <h2>Sectores activos — {sectorEvent.equipoLocal} vs {sectorEvent.equipoVisitante}</h2>
+            <p className="admin-sectors-hint">{sectorEvent.estadio}</p>
+
+            {sectorLoading ? (
+              <p className="admin-sectors-loading">Cargando sectores...</p>
+            ) : (
+              <div className="admin-sectors-list">
+                {stadiumSectors.map(s => (
+                  <div key={s.id} className="admin-sector-row">
+                    <label className="admin-sector-toggle">
+                      <input type="checkbox"
+                        checked={enabledSectors[s.id] || false}
+                        onChange={() => toggleSector(s.id)} />
+                      <span className="admin-sector-name">Sector {s.nombre}</span>
+                      <span className="admin-sector-capacity">Cap. {s.capacidadMaxima}</span>
+                    </label>
+                    {enabledSectors[s.id] && (
+                      <div className="admin-sector-price">
+                        <label className="admin-field">
+                          Precio ($)
+                          <input className="admin-input admin-input--price" type="number" step="0.01" min="0"
+                            value={sectorPrices[s.id] ?? ""}
+                            onChange={e => setSectorPrice(s.id, e.target.value)} />
+                        </label>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="admin-modal-actions">
+              <button className="admin-actionButton admin-actionButton--secondary"
+                onClick={() => { setShowSectorModal(false); setSectorEvent(null); }}>
+                Cancelar
+              </button>
+              <button className="admin-actionButton" onClick={saveSectors} disabled={sectorLoading}>
+                Guardar sectores
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <section className="admin-list">
         {events.map(event => (
           <article className="admin-list-item" key={event.id}>
@@ -200,7 +314,9 @@ export default function AdminEventos() {
               <button className="admin-list-button admin-list-button--edit" onClick={() => openEditModal(event)}>
                 Editar
               </button>
-              <button onClick={() => sector(event.id, event.estadio)}>Habilitar sector</button>
+              <button className="admin-list-button admin-list-button--sectors" onClick={() => openSectorModal(event)}>
+                Sectores
+              </button>
             </div>
           </article>
         ))}

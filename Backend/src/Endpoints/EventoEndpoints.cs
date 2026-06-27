@@ -16,6 +16,7 @@ public static class EventoEndpoints
         admin.MapPut("/{id:int}", Update);
         admin.MapDelete("/{id:int}", Delete);
         admin.MapPost("/{idEvento:int}/sectores-habilitados", HabilitarSector);
+        admin.MapPut("/{idEvento:int}/sectores-habilitados/{idSector:int}", ActualizarPrecioSector);
         admin.MapDelete("/{idEvento:int}/sectores-habilitados/{idSector:int}", DeshabilitarSector);
     }
 
@@ -224,11 +225,12 @@ public static class EventoEndpoints
 
         var cmd = conn.CreateCommand();
         cmd.CommandText = @"
-            INSERT INTO EventoHabilitaSector (id_evento, id_sector, nombre_estadio)
-            VALUES (@idEvento, @idSector, @nombreEstadio)";
+            INSERT INTO EventoHabilitaSector (id_evento, id_sector, nombre_estadio, precio)
+            VALUES (@idEvento, @idSector, @nombreEstadio, @precio)";
         cmd.Parameters.Add(new MySql.Data.MySqlClient.MySqlParameter("@idEvento", idEvento));
         cmd.Parameters.Add(new MySql.Data.MySqlClient.MySqlParameter("@idSector", body.IdSector));
         cmd.Parameters.Add(new MySql.Data.MySqlClient.MySqlParameter("@nombreEstadio", body.NombreEstadio));
+        cmd.Parameters.Add(new MySql.Data.MySqlClient.MySqlParameter("@precio", body.Precio));
 
         try
         {
@@ -243,6 +245,31 @@ public static class EventoEndpoints
         {
             return Results.BadRequest(new { mensaje = "Evento o sector no existe" });
         }
+    }
+
+    private static async Task<IResult> ActualizarPrecioSector(int idEvento, int idSector, HttpContext http, IAdministradorDatabase db)
+    {
+        using var conn = db.CreateConnection();
+        conn.Open();
+
+        var body = await http.Request.ReadFromJsonAsync<ActualizarPrecioSectorRequest>();
+        if (body is null)
+            return Results.BadRequest(new { mensaje = "Cuerpo inválido" });
+
+        var cmd = conn.CreateCommand();
+        cmd.CommandText = @"
+            UPDATE EventoHabilitaSector
+            SET precio = @precio
+            WHERE id_evento = @idEvento AND id_sector = @idSector";
+        cmd.Parameters.Add(new MySql.Data.MySqlClient.MySqlParameter("@idEvento", idEvento));
+        cmd.Parameters.Add(new MySql.Data.MySqlClient.MySqlParameter("@idSector", idSector));
+        cmd.Parameters.Add(new MySql.Data.MySqlClient.MySqlParameter("@precio", body.Precio));
+
+        int rows = cmd.ExecuteNonQuery();
+        if (rows == 0)
+            return Results.NotFound(new { mensaje = "Sector no habilitado para este evento" });
+
+        return Results.Ok(new { mensaje = "Precio actualizado con éxito" });
     }
 
     private static async Task<IResult> DeshabilitarSector(int idEvento, int idSector, IAdministradorDatabase db)
@@ -290,4 +317,6 @@ public record CreateEventoRequest(
     string PaisEquipoVisitante
 );
 
-public record HabilitarSectorRequest(int IdSector, string NombreEstadio);
+public record HabilitarSectorRequest(int IdSector, string NombreEstadio, decimal Precio = 0);
+
+public record ActualizarPrecioSectorRequest(decimal Precio);
