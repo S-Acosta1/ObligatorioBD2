@@ -54,7 +54,8 @@ public static class AdminReportEndpoints
                    el.nombre AS equipo_local,
                    ev2.nombre AS equipo_visitante,
                    est.nombre AS estadio,
-                   COUNT(e.id_entrada) AS entradas_vendidas
+                   COUNT(e.id_entrada) AS entradas_vendidas,
+                   SUM(e.precio) AS monto_vendido
             FROM Evento ev
             JOIN Entrada e ON e.id_evento = ev.id_evento
             JOIN Equipo el ON el.nombre = ev.nombre_equipo_a AND el.cod_pais = ev.pais_equipo_a
@@ -76,7 +77,8 @@ public static class AdminReportEndpoints
                 equipoLocal = reader.GetString(3),
                 equipoVisitante = reader.GetString(4),
                 estadio = reader.GetString(5),
-                entradasVendidas = reader.GetInt32(6)
+                entradasVendidas = reader.GetInt32(6),
+                montoVendido = reader.GetDecimal(7)
             });
         }
 
