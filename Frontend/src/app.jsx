@@ -1,5 +1,5 @@
 import "./app.css";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { jwtDecode } from "jwt-decode";
 import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import AuthLayout from "./auth/auth.jsx";
@@ -15,7 +15,7 @@ import AdminReportes from "./Admin/AdminReportes";
 import Dashboard from "./dashboard/dashboard.jsx";
 import Purchase from "./purchase/purchase.jsx";
 import Profile from "./profile/profile.jsx";
-import { login } from "./api.js";
+import { login, fetchEntradas } from "./api.js";
 
 const seedUsers = [
   { email: "usuario@email.com", password: "123456", name: "Usuario General", role: "user" },
@@ -111,6 +111,47 @@ export default function App() {
     clearSession();
   }, []);
 
+  const fetchUserTickets = useCallback(async (email) => {
+    try {
+      const data = await fetchEntradas(email);
+      const mapped = data.map((t) => {
+        const [date, timeFull] = t.fechaHora.split("T");
+        const time = timeFull?.slice(0, 5) || "";
+        return {
+          id: t.id,
+          selection: t.equipoLocal,
+          rival: t.equipoVisitante,
+          competition: "",
+          stadium: t.nombreEstadio,
+          city: t.ubicacion,
+          date,
+          time,
+          price: t.precio,
+          totalPrice: t.montoTotal,
+          sectorName: t.sectorNombre,
+          purchasedByEmail: t.purchasedByEmail,
+          purchasedByName: t.buyerNombre,
+          currentHolderEmail: t.currentHolderEmail,
+          currentHolder: t.holderNombre,
+          documentType: t.holderDocTipo,
+          documentNumber: t.holderDocNumero,
+          estado: t.estado,
+          pendingTransfer: null,
+          transferHistory: [],
+        };
+      });
+      setOwnedTickets(mapped);
+    } catch {
+      setOwnedTickets([]);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (currentUser?.email) {
+      fetchUserTickets(currentUser.email);
+    }
+  }, [currentUser, fetchUserTickets]);
+
   useEffect(() => {
     if (!currentUser) return;
 
@@ -165,6 +206,12 @@ export default function App() {
   };
 
   const handleClearLoginError = () => setLoginError(null);
+
+  const refreshTickets = useCallback(() => {
+    if (currentUser?.email) {
+      fetchUserTickets(currentUser.email);
+    }
+  }, [currentUser, fetchUserTickets]);
 
   const handleTransferTicket = (ticketId, recipient) => {
     const normalizedRecipient = recipient.trim().toLowerCase();
@@ -363,6 +410,7 @@ export default function App() {
               currentUser={currentUser}
               onNotify={showNotification}
               onBackToHome={() => navigate("/home")}
+              refreshTickets={refreshTickets}
             />
           </ProtectedRoute>
         } />

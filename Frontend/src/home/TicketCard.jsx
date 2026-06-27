@@ -52,17 +52,16 @@ export default function TicketCard({
           </p>
         </div>
         <div className="ticket-card__price">
-          <span>Total</span>
-          <strong>${ticket.totalPrice}</strong>
+          <span>Precio</span>
+          <strong>${ticket.price}</strong>
         </div>
       </div>
 
       <div className="ticket-card__details">
-        <p><strong>Cantidad:</strong> {ticket.quantity}</p>
-        <p><strong>Sector:</strong> {ticket.sectorName ? `Sector ${ticket.sectorName}` : ticket.ticketType?.toUpperCase()}</p>
-        <p><strong>Documento:</strong> {ticket.documentType === "passport" ? "Pasaporte" : "DNI / CI"} {ticket.documentNumber}</p>
+        <p><strong>Sector:</strong> Sector {ticket.sectorName}</p>
         <p><strong>Comprador:</strong> {ticket.purchasedByName}</p>
         <p><strong>Titular actual:</strong> {ticket.currentHolder}</p>
+        <p><strong>Total compra:</strong> ${ticket.totalPrice}</p>
         <p><strong>Estadio:</strong> {ticket.stadium}</p>
         <p><strong>Ciudad:</strong> {ticket.city}</p>
         {ticket.pendingTransfer && (
