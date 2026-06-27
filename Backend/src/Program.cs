@@ -82,6 +82,8 @@ app.MapTipoDocumentoEndpoints();
 app.MapSectorEndpoints();
 app.MapUsuarioEndpoints();
 app.MapEscanerEndpoints();
+app.MapAdminFuncionariosEndpoints();
+app.MapAdminAsignacionesEndpoints();
 app.MapAdminReportEndpoints();
 app.MapCompraEndpoints();
 app.MapTransferenciaEndpoints();

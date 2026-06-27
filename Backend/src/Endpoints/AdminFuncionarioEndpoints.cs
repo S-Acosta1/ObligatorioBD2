@@ -8,10 +8,45 @@ public static class AdminFuncionariosEndpoints
         var admin = app.MapGroup("/api/admin/funcionarios").RequireAuthorization("AdminOnly");
 
         admin.MapGet("/", GetFuncionarios);
+        admin.MapGet("/por-estadio/{nombreEstadio}", GetFuncionariosPorEstadio);
         admin.MapGet("/{email}/asignaciones", GetAsignacionesFuncionario);
         admin.MapPost("/", CrearFuncionario);
         admin.MapPut("/{email}", ModificarFuncionario);
         admin.MapDelete("/{email}", EliminarFuncionario);
+    }
+
+    private static async Task<IResult> GetFuncionariosPorEstadio(
+        string nombreEstadio,
+        IAdministradorLecturaDatabase db)
+    {
+        using var conn = db.CreateConnection();
+        conn.Open();
+        var cmd = conn.CreateCommand();
+        cmd.CommandText = @"
+            SELECT u.email, u.nombre, f.num_legajo
+            FROM Funcionario f
+            JOIN Usuario u ON u.email = f.email_usuario
+            JOIN FuncionarioTrabajaEstadio fte ON fte.email_funcionario = f.email_usuario
+            WHERE fte.nombre_estadio = @estadio
+            ORDER BY u.nombre";
+
+        var paramEstadio = cmd.CreateParameter();
+        paramEstadio.ParameterName = "@estadio";
+        paramEstadio.Value = nombreEstadio;
+        cmd.Parameters.Add(paramEstadio);
+
+        using var reader = cmd.ExecuteReader();
+        var list = new List<object>();
+        while (reader.Read())
+        {
+            list.Add(new
+            {
+                email  = reader.GetString(0),
+                nombre = reader.GetString(1),
+                legajo = reader.GetInt32(2)
+            });
+        }
+        return Results.Ok(list);
     }
 
     private static async Task<IResult> GetFuncionarios(IAdministradorLecturaDatabase db)

@@ -228,6 +228,29 @@ export async function eliminarEscaner(id, nombreEstadio) {
   return request(`/escaners/${id}/${nombreEstadio}`, { method: "DELETE", auth: true });
 }
 
+export async function getEscanerFuncionarios(id, nombreEstadio) {
+  return request(`/escaners/${id}/${nombreEstadio}/funcionarios`, { auth: true });
+}
+
+export async function getEscanerFuncionariosPosibles(id, nombreEstadio) {
+  return request(`/escaners/${id}/${nombreEstadio}/funcionarios-posibles`, { auth: true });
+}
+
+export async function asignarFuncionarioEscaner(id, nombreEstadio, email) {
+  return request(`/escaners/${id}/${nombreEstadio}/funcionarios`, {
+    method: "POST",
+    body: JSON.stringify({ email }),
+    auth: true,
+  });
+}
+
+export async function desasignarFuncionarioEscaner(id, nombreEstadio, email) {
+  return request(`/escaners/${id}/${nombreEstadio}/funcionarios/${encodeURIComponent(email)}`, {
+    method: "DELETE",
+    auth: true,
+  });
+}
+
 // ── Funcionarios ──
 
 export async function getFuncionarios() {
@@ -244,6 +267,10 @@ export async function eliminarFuncionario(email) {
 
 export async function modificarFuncionario(email, data) {
   return request(`/admin/funcionarios/${email}`, { method: "PUT", body: JSON.stringify(data), auth: true });
+}
+
+export async function getFuncionariosPorEstadio(nombreEstadio) {
+  return request(`/admin/funcionarios/por-estadio/${encodeURIComponent(nombreEstadio)}`, { auth: true });
 }
 
 // ── Asignaciones ──

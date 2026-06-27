@@ -16,6 +16,9 @@ import {
   getEscaners,
   crearEscaner,
   eliminarEscaner,
+  getEscanerFuncionariosPosibles,
+  asignarFuncionarioEscaner,
+  desasignarFuncionarioEscaner,
   fetchPaises
 } from "../api";
 
@@ -41,6 +44,9 @@ export default function AdminConfiguracion() {
   const [sectorEditing, setSectorEditing] = useState(null);
 
   const [escaner, setEscaner] = useState({ id: "", nombreEstadio: "" });
+  const [showScannerModal, setShowScannerModal] = useState(false);
+  const [scannerEditing, setScannerEditing] = useState(null);
+  const [scannerFuncionariosPosibles, setScannerFuncionariosPosibles] = useState([]);
 
   async function loadData() {
     try {
@@ -222,6 +228,33 @@ export default function AdminConfiguracion() {
     }
   }
 
+  async function openEditScanner(e) {
+    setScannerEditing(e);
+    setShowScannerModal(true);
+    try {
+      const posibles = await getEscanerFuncionariosPosibles(e.id, e.nombreEstadio);
+      setScannerFuncionariosPosibles(posibles);
+    } catch (error) {
+      onNotify?.(error.message, "error");
+    }
+  }
+
+  async function toggleAsignacionFuncionario(email, asignado) {
+    if (!scannerEditing) return;
+    try {
+      if (asignado) {
+        await desasignarFuncionarioEscaner(scannerEditing.id, scannerEditing.nombreEstadio, email);
+      } else {
+        await asignarFuncionarioEscaner(scannerEditing.id, scannerEditing.nombreEstadio, email);
+      }
+      const posibles = await getEscanerFuncionariosPosibles(scannerEditing.id, scannerEditing.nombreEstadio);
+      setScannerFuncionariosPosibles(posibles);
+      onNotify?.(`Funcionario ${asignado ? "desasignado" : "asignado"} con éxito.`, "success");
+    } catch (error) {
+      onNotify?.(error.message, "error");
+    }
+  }
+
   return (
     <section className="admin-page-section">
       <h1>Configuración del sistema</h1>
@@ -266,15 +299,23 @@ export default function AdminConfiguracion() {
           <input className="admin-input" placeholder="ID"
             value={escaner.id}
             onChange={e => setEscaner({ ...escaner, id: e.target.value })} />
-          <input className="admin-input" placeholder="Estadio"
+          <select className="admin-input"
             value={escaner.nombreEstadio}
-            onChange={e => setEscaner({ ...escaner, nombreEstadio: e.target.value })} />
+            onChange={e => setEscaner({ ...escaner, nombreEstadio: e.target.value })}>
+            <option value="">Seleccionar estadio</option>
+            {estadios.map(e => (
+              <option key={e.nombre} value={e.nombre}>{e.nombre}</option>
+            ))}
+          </select>
           <button className="admin-actionButton" onClick={addEscaner}>Crear</button>
           <div className="admin-list">
             {escaners.map(e => (
               <div className="admin-list-item" key={e.id}>
                 <span>{e.id} - {e.nombreEstadio}</span>
-                <button onClick={() => handleEliminarEscaner(e.id, e.nombreEstadio)}>X</button>
+                <div className="admin-list-actions">
+                  <button className="admin-list-button admin-list-button--edit" onClick={() => openEditScanner(e)}>Editar</button>
+                  <button onClick={() => handleEliminarEscaner(e.id, e.nombreEstadio)}>X</button>
+                </div>
               </div>
             ))}
           </div>
@@ -380,6 +421,33 @@ export default function AdminConfiguracion() {
               <button className="admin-actionButton admin-actionButton--secondary" onClick={() => setShowSectorModal(false)}>
                 Cerrar
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showScannerModal && scannerEditing && (
+        <div className="admin-modal-overlay" onClick={() => setShowScannerModal(false)}>
+          <div className="admin-modal admin-modal--sectors" onClick={e => e.stopPropagation()}>
+            <h2>Escáner #{scannerEditing.id} — {scannerEditing.nombreEstadio}</h2>
+            <p className="admin-sectors-hint">Asignar funcionarios a este escáner</p>
+            <div className="admin-sectors-list">
+              {scannerFuncionariosPosibles.map(f => (
+                <div className="admin-sector-row" key={f.email}>
+                  <label className="admin-sector-toggle">
+                    <input type="checkbox" checked={f.asignado}
+                      onChange={() => toggleAsignacionFuncionario(f.email, f.asignado)} />
+                    <span className="admin-sector-name">{f.nombre}</span>
+                    <span className="admin-sector-capacity">{f.email} (Legajo: {f.legajo})</span>
+                  </label>
+                </div>
+              ))}
+              {scannerFuncionariosPosibles.length === 0 && (
+                <p className="admin-sectors-loading">No hay funcionarios trabajando en este estadio</p>
+              )}
+            </div>
+            <div className="admin-modal-actions">
+              <button className="admin-actionButton" onClick={() => setShowScannerModal(false)}>Cerrar</button>
             </div>
           </div>
         </div>

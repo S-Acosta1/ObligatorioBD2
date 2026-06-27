@@ -3,6 +3,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using ObligatorioAPI.Data;
 
@@ -16,7 +17,7 @@ public static class AuthEndpoints
         app.MapPost("/api/auth/register", Register);
     }
 
-    private static IResult Login(LoginRequest request, IAuthDatabase db, IConfiguration config)
+    private static IResult Login([FromBody] LoginRequest request, IAuthDatabase db, IConfiguration config)
     {
         using var conn = db.CreateConnection();
         conn.Open();
@@ -75,7 +76,7 @@ public static class AuthEndpoints
         });
     }
 
-    private static IResult Register(RegisterRequest request, IAuthDatabase db)
+    private static IResult Register([FromBody] RegisterRequest request, IAuthDatabase db)
     {
         using var conn = db.CreateConnection();
         conn.Open();
