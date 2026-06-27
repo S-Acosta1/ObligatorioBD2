@@ -166,29 +166,6 @@ export default function App() {
 
   const handleClearLoginError = () => setLoginError(null);
 
-  const handleConfirmPurchase = (ticketData) => {
-    if (!currentUser) {
-      showNotification("Iniciá sesión para comprar entradas.", "error");
-      navigate("/login");
-      return;
-    }
-
-    setOwnedTickets((currentTickets) => [
-      ...currentTickets,
-      {
-        ...ticketData,
-        id: `${ticketData.matchId}-${Date.now()}`,
-        purchasedByEmail: currentUser.email,
-        purchasedByName: currentUser.name,
-        currentHolderEmail: currentUser.email,
-        currentHolder: currentUser.name,
-        transferHistory: [],
-        pendingTransfer: null,
-      },
-    ]);
-    navigate("/home");
-  };
-
   const handleTransferTicket = (ticketId, recipient) => {
     const normalizedRecipient = recipient.trim().toLowerCase();
     const recipientUser = users.find((user) => user.email === normalizedRecipient);
@@ -383,7 +360,7 @@ export default function App() {
         <Route path="/purchase/:eventId" element={
           <ProtectedRoute>
             <Purchase
-              onConfirmPurchase={handleConfirmPurchase}
+              currentUser={currentUser}
               onNotify={showNotification}
               onBackToHome={() => navigate("/home")}
             />

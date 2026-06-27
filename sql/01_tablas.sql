@@ -214,7 +214,7 @@ CREATE TABLE CompraAplicaComision (
 );
 
 CREATE TABLE Entrada (
-	id_entrada      INTEGER       NOT NULL PRIMARY KEY,
+	id_entrada      INTEGER       NOT NULL AUTO_INCREMENT PRIMARY KEY,
 	precio          DECIMAL(5, 2) NOT NULL,
 	estado          VARCHAR(10)   NOT NULL DEFAULT 'VALIDA',
 	id_evento       INTEGER       NOT NULL,
@@ -389,6 +389,61 @@ BEGIN
         SET asientos_disponibles = asientos_disponibles - diff
         WHERE id_sector = NEW.id_sector
           AND nombre_estadio = NEW.nombre_estadio;
+    END IF;
+END$$
+
+CREATE TRIGGER trg_entrada_before_insert
+BEFORE INSERT ON Entrada
+FOR EACH ROW
+BEGIN
+    DECLARE disp INT;
+    DECLARE sector_precio DECIMAL(5,2);
+    SELECT asientos_disponibles, precio INTO disp, sector_precio
+    FROM EventoHabilitaSector
+    WHERE id_evento = NEW.id_evento
+      AND id_sector = NEW.id_sector
+      AND nombre_estadio = NEW.nombre_estadio
+    FOR UPDATE;
+    IF disp <= 0 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'No available seats in this sector for the event';
+    END IF;
+    SET NEW.precio = sector_precio;
+    UPDATE EventoHabilitaSector
+    SET asientos_disponibles = asientos_disponibles - 1
+    WHERE id_evento = NEW.id_evento
+      AND id_sector = NEW.id_sector
+      AND nombre_estadio = NEW.nombre_estadio;
+END$$
+
+CREATE TRIGGER trg_entrada_after_update_anulada
+AFTER UPDATE ON Entrada
+FOR EACH ROW
+BEGIN
+    IF OLD.estado != 'ANULADA' AND NEW.estado = 'ANULADA' THEN
+        UPDATE EventoHabilitaSector
+        SET asientos_disponibles = asientos_disponibles + 1
+        WHERE id_evento = NEW.id_evento
+          AND id_sector = NEW.id_sector
+          AND nombre_estadio = NEW.nombre_estadio;
+    END IF;
+END$$
+
+CREATE TRIGGER trg_check_entrada_transfer_limit
+BEFORE INSERT ON TransferenciaContieneEntrada
+FOR EACH ROW
+BEGIN
+    DECLARE transfer_count INT;
+
+    SELECT COUNT(*) INTO transfer_count
+    FROM TransferenciaContieneEntrada tce
+    JOIN Transferencia t ON tce.id_transferencia = t.id_transferencia
+    WHERE tce.id_entrada = NEW.id_entrada
+      AND t.estado = 'ACEPTADA';
+
+    IF transfer_count >= 3 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Limite alcanzado: la entrada ya ha sido transferida 3 veces.';
     END IF;
 END$$
 

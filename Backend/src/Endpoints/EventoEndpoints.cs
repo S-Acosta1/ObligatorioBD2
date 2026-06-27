@@ -182,7 +182,7 @@ public static class EventoEndpoints
 
         var cmd = conn.CreateCommand();
         cmd.CommandText = @"
-            SELECT s.id_sector, s.nombre, s.capacidad_maxima, ehs.asientos_disponibles
+            SELECT s.id_sector, s.nombre, s.capacidad_maxima, ehs.asientos_disponibles, ehs.precio
             FROM EventoHabilitaSector ehs
             JOIN Sector s ON s.id_sector = ehs.id_sector AND s.nombre_estadio = ehs.nombre_estadio
             WHERE ehs.id_evento = @id
@@ -198,7 +198,8 @@ public static class EventoEndpoints
                 idSector = reader.GetInt32(0),
                 nombre = reader.GetString(1),
                 capacidadMaxima = reader.GetInt32(2),
-                asientosDisponibles = reader.GetInt32(3)
+                asientosDisponibles = reader.GetInt32(3),
+                precio = reader.GetDecimal(4)
             });
         }
 

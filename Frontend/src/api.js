@@ -96,6 +96,25 @@ export async function fetchEventos() {
   return response.json();
 }
 
+export async function createPurchase(data) {
+  const token = localStorage.getItem("token");
+  const response = await fetch(`${API_URL}/api/compras`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(body.mensaje || "Error al procesar la compra.");
+  }
+
+  return response.json();
+}
+
 export async function fetchProfile(email) {
   const token = localStorage.getItem("token");
   const response = await fetch(`${API_URL}/api/usuarios/${encodeURIComponent(email)}`, {
