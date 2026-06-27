@@ -20,6 +20,42 @@ export async function login(email, password) {
   return response.json();
 }
 
+export async function registerUser(data) {
+  const response = await fetch(`${API_URL}/api/auth/register`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+
+  const body = await response.json();
+
+  if (!response.ok) {
+    throw new Error(body.mensaje || "Error del servidor. Intentalo de nuevo más tarde.");
+  }
+
+  return body;
+}
+
+export async function fetchTiposDocumento() {
+  const response = await fetch(`${API_URL}/api/tipos-documento`);
+
+  if (!response.ok) {
+    throw new Error("No se pudieron obtener los tipos de documento.");
+  }
+
+  return response.json();
+}
+
+export async function fetchPaises() {
+  const response = await fetch(`${API_URL}/api/paises`);
+
+  if (!response.ok) {
+    throw new Error("No se pudieron obtener los países.");
+  }
+
+  return response.json();
+}
+
 export async function fetchProfile(email) {
   const token = localStorage.getItem("token");
   const response = await fetch(`${API_URL}/api/usuarios/${encodeURIComponent(email)}`, {

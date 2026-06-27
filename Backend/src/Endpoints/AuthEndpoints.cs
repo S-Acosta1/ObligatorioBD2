@@ -161,7 +161,7 @@ public record RegisterRequest(
     string Email,
     string Nombre,
     string Password,
-    string TipoDocumento,
+    int TipoDocumento,
     string NumeroDocumento,
     string CodPaisDocumento,
     string CodPaisDireccion,
